@@ -178,6 +178,7 @@ LSM6DSOSensor::LSM6DSOSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : de
   }
   
   acc_is_enabled = 0;
+  gyro_is_enabled = 0;
 
   
   return;  
