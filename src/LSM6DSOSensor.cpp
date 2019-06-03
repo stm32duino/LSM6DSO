@@ -54,7 +54,13 @@ LSM6DSOSensor::LSM6DSOSensor(TwoWire *i2c, uint8_t address) : dev_i2c(i2c), addr
   reg_ctx.write_reg = LSM6DSO_io_write;
   reg_ctx.read_reg = LSM6DSO_io_read;
   reg_ctx.handle = (void *)this;
-  
+
+  /* Disable I3C */
+  if (lsm6dso_i3c_disable_set(&reg_ctx, LSM6DSO_I3C_DISABLE) != LSM6DSO_OK)
+  {
+    return;
+  }
+
   /* Enable register address automatically incremented during a multiple byte
   access with a serial interface. */
   if (lsm6dso_auto_increment_set(&reg_ctx, PROPERTY_ENABLE) != LSM6DSO_OK)
@@ -127,6 +133,12 @@ LSM6DSOSensor::LSM6DSOSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : de
   digitalWrite(cs_pin, HIGH); 
   dev_i2c = NULL;
   address = 0;
+
+  /* Disable I3C */
+  if (lsm6dso_i3c_disable_set(&reg_ctx, LSM6DSO_I3C_DISABLE) != LSM6DSO_OK)
+  {
+    return;
+  }
 
   /* Enable register address automatically incremented during a multiple byte
   access with a serial interface. */

@@ -159,49 +159,6 @@ typedef struct {
   *
   */
 
-/**
-  * @addtogroup  LSM6DSO_Sensitivity
-  * @brief       These macro are maintained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_fs2_to_mg(int16_t lsb);
-  *                -> _from_fs4_to_mg(int16_t lsb);
-  *                -> _from_fs8_to_mg(int16_t lsb);
-  *                -> _from_fs16_to_mg(int16_t lsb);
-  *                -> _from_fs125_to_mdps(int16_t lsb);
-  *                -> _from_fs500_to_mdps(int16_t lsb);
-  *                -> _from_fs250_to_mdps(int16_t lsb);
-  *                -> _from_fs1000_to_mdps(int16_t lsb);
-  *                -> _from_fs2000_to_mdps(int16_t lsb);
-  *                -> _from_lsb_to_celsius(int16_t lsb);
-  *                -> _from_lsb_to_nsec(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are compliant with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-  */
-
-#define LSM6DSO_FROM_FS_2g_TO_mg(lsb)    (float)(lsb *  61.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_4g_TO_mg(lsb)    (float)(lsb * 122.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_8g_TO_mg(lsb)    (float)(lsb * 244.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_16g_TO_mg(lsb)   (float)(lsb * 488.0f) / 1000.0f
-
-#define LSM6DSO_FROM_FS_125dps_TO_mdps(lsb)    (float)(lsb *  4375.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_250dps_TO_mdps(lsb)    (float)(lsb *  8750.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_500dps_TO_mdps(lsb)    (float)(lsb * 17500.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_1000dps_TO_mdps(lsb)   (float)(lsb * 35000.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_2000dps_TO_mdps(lsb)   (float)(lsb * 70000.0f) / 1000.0f
-
-#define LSM6DSO_FROM_LSB_TO_degC(lsb)    ((float)((int16_t)lsb>>8)*1.0f + 25.0f)
-
-#define LSM6DSO_TIMESTAMP_LSB_TO_NSEC	     25000ULL
-
-/**
-  * @}
-  *
-  */
-
 #define LSM6DSO_FUNC_CFG_ACCESS              0x01U
 typedef struct {
   uint8_t not_used_01              : 6;
@@ -1048,8 +1005,8 @@ typedef struct {
 #define LSM6DSO_EMB_FUNC_ODR_CFG_B           0x5FU
 typedef struct {
   uint8_t not_used_01              : 3;
-  uint8_t fsm_odr                  : 3;
-  uint8_t not_used_02              : 2;
+  uint8_t fsm_odr                  : 2;
+  uint8_t not_used_02              : 3;
 } lsm6dso_emb_func_odr_cfg_b_t;
 
 #define LSM6DSO_STEP_COUNTER_L               0x62U
@@ -1449,6 +1406,8 @@ typedef struct {
   uint8_t wr_once_done             : 1;
 } lsm6dso_status_master_t;
 
+#define LSM6DSO_START_FSM_ADD                0x0400U
+
 /**
   * @defgroup LSM6DSO_Register_Union
   * @brief    This union group all the registers that has a bitfield
@@ -1596,17 +1555,17 @@ int32_t lsm6dso_read_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lsm6dso_write_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float lsm6dso_from_fs2_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs4_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs8_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs16_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs125_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs500_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs250_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs1000_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs2000_to_mdps(int16_t lsb);
-extern float lsm6dso_from_lsb_to_celsius(int16_t lsb);
-extern float lsm6dso_from_lsb_to_nsec(int16_t lsb);
+extern float_t lsm6dso_from_fs2_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs4_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs8_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs16_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs125_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs500_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs250_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs1000_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs2000_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_lsb_to_celsius(int16_t lsb);
+extern float_t lsm6dso_from_lsb_to_nsec(int16_t lsb);
 
 typedef enum {
   LSM6DSO_2g   = 0,
@@ -1825,10 +1784,10 @@ typedef enum {
   LSM6DSO_VERY_LIGHT   = 1,
   LSM6DSO_LIGHT        = 2,
   LSM6DSO_MEDIUM       = 3,
-  LSM6DSO_STRONG       = 4,
-  LSM6DSO_VERY_STRONG  = 5,
-  LSM6DSO_AGGRESSIVE   = 6,
-  LSM6DSO_XTREME       = 7,
+  LSM6DSO_STRONG       = 4, /* not available for data rate > 1k670Hz */
+  LSM6DSO_VERY_STRONG  = 5, /* not available for data rate > 1k670Hz */
+  LSM6DSO_AGGRESSIVE   = 6, /* not available for data rate > 1k670Hz */
+  LSM6DSO_XTREME       = 7, /* not available for data rate > 1k670Hz */
 } lsm6dso_ftype_t;
 int32_t lsm6dso_gy_lp1_bandwidth_set(lsm6dso_ctx_t *ctx,
                                      lsm6dso_ftype_t val);
@@ -2077,11 +2036,11 @@ int32_t lsm6dso_i2c_interface_get(lsm6dso_ctx_t *ctx,
                                   lsm6dso_i2c_disable_t *val);
 
 typedef enum {
-  LSM6DSO_I3C_DISABLE         = 0x00,
-  LSM6DSO_I3C_ENABLE_T_50us   = 0x80,
-  LSM6DSO_I3C_ENABLE_T_2us    = 0x81,
-  LSM6DSO_I3C_ENABLE_T_1ms    = 0x82,
-  LSM6DSO_I3C_ENABLE_T_25ms   = 0x83,
+  LSM6DSO_I3C_DISABLE         = 0x80,
+  LSM6DSO_I3C_ENABLE_T_50us   = 0x00,
+  LSM6DSO_I3C_ENABLE_T_2us    = 0x01,
+  LSM6DSO_I3C_ENABLE_T_1ms    = 0x02,
+  LSM6DSO_I3C_ENABLE_T_25ms   = 0x03,
 } lsm6dso_i3c_disable_t;
 int32_t lsm6dso_i3c_disable_set(lsm6dso_ctx_t *ctx,
                                 lsm6dso_i3c_disable_t val);
@@ -2595,14 +2554,14 @@ typedef struct {
     lsm6dso_fsm_outs6_t    fsm_outs6;
     lsm6dso_fsm_outs7_t    fsm_outs7;
     lsm6dso_fsm_outs8_t    fsm_outs8;
-    lsm6dso_fsm_outs1_t    fsm_outs9;
-    lsm6dso_fsm_outs2_t    fsm_outs10;
-    lsm6dso_fsm_outs3_t    fsm_outs11;
-    lsm6dso_fsm_outs4_t    fsm_outs12;
-    lsm6dso_fsm_outs5_t    fsm_outs13;
-    lsm6dso_fsm_outs6_t    fsm_outs14;
-    lsm6dso_fsm_outs7_t    fsm_outs15;
-    lsm6dso_fsm_outs8_t    fsm_outs16;
+    lsm6dso_fsm_outs9_t    fsm_outs9;
+    lsm6dso_fsm_outs10_t   fsm_outs10;
+    lsm6dso_fsm_outs11_t   fsm_outs11;
+    lsm6dso_fsm_outs12_t   fsm_outs12;
+    lsm6dso_fsm_outs13_t   fsm_outs13;
+    lsm6dso_fsm_outs14_t   fsm_outs14;
+    lsm6dso_fsm_outs15_t   fsm_outs15;
+    lsm6dso_fsm_outs16_t   fsm_outs16;
 } lsm6dso_fsm_out_t;
 int32_t lsm6dso_fsm_out_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_out_t *val);
 
@@ -2611,8 +2570,6 @@ typedef enum {
   LSM6DSO_ODR_FSM_26Hz  = 1,
   LSM6DSO_ODR_FSM_52Hz  = 2,
   LSM6DSO_ODR_FSM_104Hz = 3,
-  LSM6DSO_ODR_FSM_208Hz = 4,
-  LSM6DSO_ODR_FSM_416Hz = 5,
 } lsm6dso_fsm_odr_t;
 int32_t lsm6dso_fsm_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t val);
 int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val);
@@ -2620,37 +2577,17 @@ int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val);
 int32_t lsm6dso_fsm_init_set(lsm6dso_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_fsm_init_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint16_t val);
+int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint16_t *val);
 
-int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t val);
+int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint16_t val);
+int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint16_t *val);
 
-typedef struct {
-    lsm6dso_sensor_hub_1_t   sh_byte_1;
-    lsm6dso_sensor_hub_2_t   sh_byte_2;
-    lsm6dso_sensor_hub_3_t   sh_byte_3;
-    lsm6dso_sensor_hub_4_t   sh_byte_4;
-    lsm6dso_sensor_hub_5_t   sh_byte_5;
-    lsm6dso_sensor_hub_6_t   sh_byte_6;
-    lsm6dso_sensor_hub_7_t   sh_byte_7;
-    lsm6dso_sensor_hub_8_t   sh_byte_8;
-    lsm6dso_sensor_hub_9_t   sh_byte_9;
-    lsm6dso_sensor_hub_10_t  sh_byte_10;
-    lsm6dso_sensor_hub_11_t  sh_byte_11;
-    lsm6dso_sensor_hub_12_t  sh_byte_12;
-    lsm6dso_sensor_hub_13_t  sh_byte_13;
-    lsm6dso_sensor_hub_14_t  sh_byte_14;
-    lsm6dso_sensor_hub_15_t  sh_byte_15;
-    lsm6dso_sensor_hub_16_t  sh_byte_16;
-    lsm6dso_sensor_hub_17_t  sh_byte_17;
-    lsm6dso_sensor_hub_18_t  sh_byte_18;
-} lsm6dso_emb_sh_read_t;
-int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx,
-                                     lsm6dso_emb_sh_read_t *val);
+int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx, uint8_t *val,
+                                     uint8_t len);
 
 typedef enum {
   LSM6DSO_SLV_0       = 0,

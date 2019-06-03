@@ -100,59 +100,59 @@ int32_t lsm6dso_write_reg(lsm6dso_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @{
   *
 */
-float lsm6dso_from_fs2_to_mg(int16_t lsb)
+float_t lsm6dso_from_fs2_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.061f;
+  return ((float_t)lsb) * 0.061f;
 }
 
-float lsm6dso_from_fs4_to_mg(int16_t lsb)
+float_t lsm6dso_from_fs4_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.122f;
+  return ((float_t)lsb) * 0.122f;
 }
 
-float lsm6dso_from_fs8_to_mg(int16_t lsb)
+float_t lsm6dso_from_fs8_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.244f;
+  return ((float_t)lsb) * 0.244f;
 }
 
-float lsm6dso_from_fs16_to_mg(int16_t lsb)
+float_t lsm6dso_from_fs16_to_mg(int16_t lsb)
 {
-  return ((float)lsb) *0.488f;
+  return ((float_t)lsb) *0.488f;
 }
 
-float lsm6dso_from_fs125_to_mdps(int16_t lsb)
+float_t lsm6dso_from_fs125_to_mdps(int16_t lsb)
 {
-  return ((float)lsb) *4.375f;
+  return ((float_t)lsb) *4.375f;
 }
 
-float lsm6dso_from_fs500_to_mdps(int16_t lsb)
+float_t lsm6dso_from_fs500_to_mdps(int16_t lsb)
 {
-  return ((float)lsb) *1.750f;
+  return ((float_t)lsb) *17.50f;
 }
 
-float lsm6dso_from_fs250_to_mdps(int16_t lsb)
+float_t lsm6dso_from_fs250_to_mdps(int16_t lsb)
 {
-  return ((float)lsb) *0.875f;
+  return ((float_t)lsb) *8.750f;
 }
 
-float lsm6dso_from_fs1000_to_mdps(int16_t lsb)
+float_t lsm6dso_from_fs1000_to_mdps(int16_t lsb)
 {
-  return ((float)lsb) *0.035f;
+  return ((float_t)lsb) *35.0f;
 }
 
-float lsm6dso_from_fs2000_to_mdps(int16_t lsb)
+float_t lsm6dso_from_fs2000_to_mdps(int16_t lsb)
 {
-  return ((float)lsb) *0.070f;
+  return ((float_t)lsb) *70.0f;
 }
 
-float lsm6dso_from_lsb_to_celsius(int16_t lsb)
+float_t lsm6dso_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float)lsb / 256.0f) + 25.0f);
+  return (((float_t)lsb / 256.0f) + 25.0f);
 }
 
-float lsm6dso_from_lsb_to_nsec(int16_t lsb)
+float_t lsm6dso_from_lsb_to_nsec(int16_t lsb)
 {
-  return ((float)lsb * 25000.0f);
+  return ((float_t)lsb * 25000.0f);
 }
 
 /**
@@ -1275,7 +1275,7 @@ int32_t lsm6dso_ln_pg_write_byte(lsm6dso_ctx_t *ctx, uint16_t address,
   }
 
   if (ret == 0) {
-    page_sel.page_sel = (((uint8_t)address >> 8) & 0x0FU);
+    page_sel.page_sel = ((uint8_t)(address >> 8) & 0x0FU);
     page_sel.not_used_01 = 1;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
@@ -1316,12 +1316,11 @@ int32_t lsm6dso_ln_pg_write(lsm6dso_ctx_t *ctx, uint16_t address,
   lsm6dso_page_rw_t page_rw;
   lsm6dso_page_sel_t page_sel;
   lsm6dso_page_address_t  page_address;
+  uint16_t addr_pointed;
   int32_t ret;
-  uint8_t msb, lsb;
   uint8_t i ;
 
-  msb = (((uint8_t)address >> 8) & 0x0fU);
-  lsb = (uint8_t)address & 0xFFU;
+  addr_pointed = address;
 
   ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
@@ -1336,29 +1335,25 @@ int32_t lsm6dso_ln_pg_write(lsm6dso_ctx_t *ctx, uint16_t address,
     ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
   if (ret == 0) {
-    page_sel.page_sel = msb;
+    page_sel.page_sel = ((uint8_t)(addr_pointed >> 8) & 0x0FU);
     page_sel.not_used_01 = 1;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
   if (ret == 0) {
-    page_address.page_addr = lsb;
+    page_address.page_addr = (uint8_t)(addr_pointed & 0x00FFU);
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_ADDRESS,
                             (uint8_t*)&page_address, 1);
   }
 
   if (ret == 0) {
-
-    for (i = 0; ( (i < len) && (ret == 0) ); i++)
-    {
+    for (i = 0; ( (i < len) && (ret == 0) ); i++) {
       ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_VALUE, &buf[i], 1);
-
+      addr_pointed++;
       /* Check if page wrap */
-      if ( (lsb == 0x00U) && (ret == 0) ) {
-        lsb++;
-        msb++;
+      if ( ( (addr_pointed % 0x0100U) == 0x00U ) && (ret == 0) ) {
         ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*)&page_sel, 1);
         if (ret == 0) {
-          page_sel.page_sel = msb;
+          page_sel.page_sel = ((uint8_t)(addr_pointed >> 8) & 0x0FU);
           page_sel.not_used_01 = 1;
           ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_SEL,
                                   (uint8_t*)&page_sel, 1);
@@ -1370,16 +1365,13 @@ int32_t lsm6dso_ln_pg_write(lsm6dso_ctx_t *ctx, uint16_t address,
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
   if (ret == 0) {
-
     ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
   }
   if (ret == 0) {
     page_rw.page_rw = 0x00; /* page_write disable */
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
   }
-
   if (ret == 0) {
-
     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
   }
   return ret;
@@ -1415,7 +1407,7 @@ int32_t lsm6dso_ln_pg_read_byte(lsm6dso_ctx_t *ctx, uint16_t address,
     ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
   if (ret == 0) {
-    page_sel.page_sel = (((uint8_t)address >> 8) & 0x0FU);
+    page_sel.page_sel = ((uint8_t)(address >> 8) & 0x0FU);
     page_sel.not_used_01 = 1;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
@@ -3514,6 +3506,7 @@ int32_t lsm6dso_int1_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_int1_pd_en_t *val)
 int32_t lsm6dso_pin_int1_route_set(lsm6dso_ctx_t *ctx,
                                    lsm6dso_pin_int1_route_t *val)
 {
+  lsm6dso_pin_int2_route_t pin_int2_route;
   lsm6dso_tap_cfg2_t tap_cfg2;
   int32_t ret;
 
@@ -3533,27 +3526,28 @@ int32_t lsm6dso_pin_int1_route_set(lsm6dso_ctx_t *ctx,
   if (ret == 0) {
     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
   }
+
   if (ret == 0) {
-    if ( (val->emb_func_int1.int1_fsm_lc |
-          val->emb_func_int1.int1_sig_mot |
-          val->emb_func_int1.int1_step_detector |
-          val->emb_func_int1.int1_tilt |
-          val->fsm_int1_a.int1_fsm1 |
-          val->fsm_int1_a.int1_fsm2 |
-          val->fsm_int1_a.int1_fsm3 |
-          val->fsm_int1_a.int1_fsm4 |
-          val->fsm_int1_a.int1_fsm5 |
-          val->fsm_int1_a.int1_fsm6 |
-          val->fsm_int1_a.int1_fsm7 |
-          val->fsm_int1_a.int1_fsm8 |
-          val->fsm_int1_b.int1_fsm9 |
-          val->fsm_int1_b.int1_fsm10 |
-          val->fsm_int1_b.int1_fsm11 |
-          val->fsm_int1_b.int1_fsm12 |
-          val->fsm_int1_b.int1_fsm13 |
-          val->fsm_int1_b.int1_fsm14 |
-          val->fsm_int1_b.int1_fsm15 |
-          val->fsm_int1_b.int1_fsm16) != PROPERTY_DISABLE  ){
+    if ( ( val->emb_func_int1.int1_fsm_lc
+         | val->emb_func_int1.int1_sig_mot
+         | val->emb_func_int1.int1_step_detector
+         | val->emb_func_int1.int1_tilt
+         | val->fsm_int1_a.int1_fsm1
+         | val->fsm_int1_a.int1_fsm2
+         | val->fsm_int1_a.int1_fsm3
+         | val->fsm_int1_a.int1_fsm4
+         | val->fsm_int1_a.int1_fsm5
+         | val->fsm_int1_a.int1_fsm6
+         | val->fsm_int1_a.int1_fsm7
+         | val->fsm_int1_a.int1_fsm8
+         | val->fsm_int1_b.int1_fsm9
+         | val->fsm_int1_b.int1_fsm10
+         | val->fsm_int1_b.int1_fsm11
+         | val->fsm_int1_b.int1_fsm12
+         | val->fsm_int1_b.int1_fsm13
+         | val->fsm_int1_b.int1_fsm14
+         | val->fsm_int1_b.int1_fsm15
+         | val->fsm_int1_b.int1_fsm16) != PROPERTY_DISABLE){
       val->md1_cfg.int1_emb_func = PROPERTY_ENABLE;
     }
     else{
@@ -3568,23 +3562,38 @@ int32_t lsm6dso_pin_int1_route_set(lsm6dso_ctx_t *ctx,
   if (ret == 0) {
     ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
   }
-  if (ret == 0) {
 
-    if ( (val->int1_ctrl.den_drdy_flag |
-        val->int1_ctrl.int1_boot |
-        val->int1_ctrl.int1_cnt_bdr |
-        val->int1_ctrl.int1_drdy_g |
-        val->int1_ctrl.int1_drdy_xl |
-        val->int1_ctrl.int1_fifo_full |
-        val->int1_ctrl.int1_fifo_ovr |
-        val->int1_ctrl.int1_fifo_th |
-        val->md1_cfg.int1_6d |
-        val->md1_cfg.int1_double_tap|
-        val->md1_cfg.int1_ff |
-        val->md1_cfg.int1_wu |
-        val->md1_cfg.int1_single_tap |
-        val->md1_cfg.int1_sleep_change) != PROPERTY_DISABLE)
-    {
+  if (ret == 0) {
+    ret = lsm6dso_pin_int2_route_get(ctx, &pin_int2_route);
+  }
+  if (ret == 0) {
+    if ( ( pin_int2_route.int2_ctrl.int2_cnt_bdr
+         | pin_int2_route.int2_ctrl.int2_drdy_g
+         | pin_int2_route.int2_ctrl.int2_drdy_temp
+         | pin_int2_route.int2_ctrl.int2_drdy_xl
+         | pin_int2_route.int2_ctrl.int2_fifo_full
+         | pin_int2_route.int2_ctrl.int2_fifo_ovr
+         | pin_int2_route.int2_ctrl.int2_fifo_th
+         | pin_int2_route.md2_cfg.int2_6d
+         | pin_int2_route.md2_cfg.int2_double_tap
+         | pin_int2_route.md2_cfg.int2_ff
+         | pin_int2_route.md2_cfg.int2_wu
+         | pin_int2_route.md2_cfg.int2_single_tap
+         | pin_int2_route.md2_cfg.int2_sleep_change
+         | val->int1_ctrl.den_drdy_flag
+         | val->int1_ctrl.int1_boot
+         | val->int1_ctrl.int1_cnt_bdr
+         | val->int1_ctrl.int1_drdy_g
+         | val->int1_ctrl.int1_drdy_xl
+         | val->int1_ctrl.int1_fifo_full
+         | val->int1_ctrl.int1_fifo_ovr
+         | val->int1_ctrl.int1_fifo_th
+         | val->md1_cfg.int1_6d
+         | val->md1_cfg.int1_double_tap
+         | val->md1_cfg.int1_ff
+         | val->md1_cfg.int1_wu
+         | val->md1_cfg.int1_single_tap
+         | val->md1_cfg.int1_sleep_change) != PROPERTY_DISABLE) {
       tap_cfg2.interrupts_enable = PROPERTY_ENABLE;
     }
     else{
@@ -3647,6 +3656,7 @@ int32_t lsm6dso_pin_int1_route_get(lsm6dso_ctx_t *ctx,
 int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx,
                                    lsm6dso_pin_int2_route_t *val)
 {
+  lsm6dso_pin_int1_route_t pin_int1_route;
   lsm6dso_tap_cfg2_t tap_cfg2;
   int32_t ret;
 
@@ -3666,28 +3676,28 @@ int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx,
   if (ret == 0) {
     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
   }
+
   if (ret == 0) {
     if (( val->emb_func_int2.int2_fsm_lc
-         | val->emb_func_int2.int2_sig_mot
-         | val->emb_func_int2.int2_step_detector
-         | val->emb_func_int2.int2_tilt
-         | val->fsm_int2_a.int2_fsm1
-         | val->fsm_int2_a.int2_fsm2
-         | val->fsm_int2_a.int2_fsm3
-         | val->fsm_int2_a.int2_fsm4
-         | val->fsm_int2_a.int2_fsm5
-         | val->fsm_int2_a.int2_fsm6
-         | val->fsm_int2_a.int2_fsm7
-         | val->fsm_int2_a.int2_fsm8
-         | val->fsm_int2_b.int2_fsm9
-         | val->fsm_int2_b.int2_fsm10
-         | val->fsm_int2_b.int2_fsm11
-         | val->fsm_int2_b.int2_fsm12
-         | val->fsm_int2_b.int2_fsm13
-         | val->fsm_int2_b.int2_fsm14
-         | val->fsm_int2_b.int2_fsm15
-         | val->fsm_int2_b.int2_fsm16 )!= PROPERTY_DISABLE)
-    {
+        | val->emb_func_int2.int2_sig_mot
+        | val->emb_func_int2.int2_step_detector
+        | val->emb_func_int2.int2_tilt
+        | val->fsm_int2_a.int2_fsm1
+        | val->fsm_int2_a.int2_fsm2
+        | val->fsm_int2_a.int2_fsm3
+        | val->fsm_int2_a.int2_fsm4
+        | val->fsm_int2_a.int2_fsm5
+        | val->fsm_int2_a.int2_fsm6
+        | val->fsm_int2_a.int2_fsm7
+        | val->fsm_int2_a.int2_fsm8
+        | val->fsm_int2_b.int2_fsm9
+        | val->fsm_int2_b.int2_fsm10
+        | val->fsm_int2_b.int2_fsm11
+        | val->fsm_int2_b.int2_fsm12
+        | val->fsm_int2_b.int2_fsm13
+        | val->fsm_int2_b.int2_fsm14
+        | val->fsm_int2_b.int2_fsm15
+        | val->fsm_int2_b.int2_fsm16 )!= PROPERTY_DISABLE ){
       val->md2_cfg.int2_emb_func = PROPERTY_ENABLE;
     }
     else{
@@ -3702,6 +3712,11 @@ int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx,
   if (ret == 0) {
     ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
   }
+
+  if (ret == 0) {
+    ret = lsm6dso_pin_int1_route_get(ctx, &pin_int1_route);
+  }
+
   if (ret == 0) {
     if ( ( val->int2_ctrl.int2_cnt_bdr
          | val->int2_ctrl.int2_drdy_g
@@ -3712,9 +3727,24 @@ int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx,
          | val->int2_ctrl.int2_fifo_th
          | val->md2_cfg.int2_6d
          | val->md2_cfg.int2_double_tap
-         | val->md2_cfg.int2_ff | val->md2_cfg.int2_wu
+         | val->md2_cfg.int2_ff
+         | val->md2_cfg.int2_wu
          | val->md2_cfg.int2_single_tap
-         | val->md2_cfg.int2_sleep_change) != PROPERTY_DISABLE ){
+         | val->md2_cfg.int2_sleep_change
+         | pin_int1_route.int1_ctrl.den_drdy_flag
+         | pin_int1_route.int1_ctrl.int1_boot
+         | pin_int1_route.int1_ctrl.int1_cnt_bdr
+         | pin_int1_route.int1_ctrl.int1_drdy_g
+         | pin_int1_route.int1_ctrl.int1_drdy_xl
+         | pin_int1_route.int1_ctrl.int1_fifo_full
+         | pin_int1_route.int1_ctrl.int1_fifo_ovr
+         | pin_int1_route.int1_ctrl.int1_fifo_th
+         | pin_int1_route.md1_cfg.int1_6d
+         | pin_int1_route.md1_cfg.int1_double_tap
+         | pin_int1_route.md1_cfg.int1_ff
+         | pin_int1_route.md1_cfg.int1_wu
+         | pin_int1_route.md1_cfg.int1_single_tap
+         | pin_int1_route.md1_cfg.int1_sleep_change ) != PROPERTY_DISABLE) {
       tap_cfg2.interrupts_enable = PROPERTY_ENABLE;
     }
     else{
@@ -7689,21 +7719,21 @@ int32_t lsm6dso_fsm_enable_set(lsm6dso_ctx_t *ctx,
   }
   if (ret == 0) {
     if ( (val->fsm_enable_a.fsm1_en   |
-         val->fsm_enable_a.fsm2_en  |
-         val->fsm_enable_a.fsm3_en  |
-         val->fsm_enable_a.fsm4_en  |
-         val->fsm_enable_a.fsm5_en  |
-         val->fsm_enable_a.fsm6_en  |
-         val->fsm_enable_a.fsm7_en  |
-         val->fsm_enable_a.fsm8_en  |
-         val->fsm_enable_b.fsm9_en  |
-         val->fsm_enable_b.fsm10_en  |
-         val->fsm_enable_b.fsm11_en  |
-         val->fsm_enable_b.fsm12_en  |
-         val->fsm_enable_b.fsm13_en  |
-         val->fsm_enable_b.fsm14_en  |
-         val->fsm_enable_b.fsm15_en  |
-         val->fsm_enable_b.fsm16_en  )
+          val->fsm_enable_a.fsm2_en   |
+          val->fsm_enable_a.fsm3_en   |
+          val->fsm_enable_a.fsm4_en   |
+          val->fsm_enable_a.fsm5_en   |
+          val->fsm_enable_a.fsm6_en   |
+          val->fsm_enable_a.fsm7_en   |
+          val->fsm_enable_a.fsm8_en   |
+          val->fsm_enable_b.fsm9_en   |
+          val->fsm_enable_b.fsm10_en  |
+          val->fsm_enable_b.fsm11_en  |
+          val->fsm_enable_b.fsm12_en  |
+          val->fsm_enable_b.fsm13_en  |
+          val->fsm_enable_b.fsm14_en  |
+          val->fsm_enable_b.fsm15_en  |
+          val->fsm_enable_b.fsm16_en  )
         != PROPERTY_DISABLE)
     {
       reg.fsm_en = PROPERTY_ENABLE;
@@ -7874,7 +7904,7 @@ int32_t lsm6dso_fsm_out_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_out_t *val)
 
   ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_OUTS1, (uint8_t*) &val, 16);
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_OUTS1, (uint8_t*)val, 16);
   }
   if (ret == 0) {
     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
@@ -7902,7 +7932,7 @@ int32_t lsm6dso_fsm_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t val)
   }
   if (ret == 0) {
     reg.not_used_01 = 3; /* set default values */
-    reg.not_used_02 = 1; /* set default values */
+    reg.not_used_02 = 2; /* set default values */
     reg.fsm_odr = (uint8_t)val;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_ODR_CFG_B,
                             (uint8_t*)&reg, 1);
@@ -7943,12 +7973,6 @@ int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val)
         break;
       case LSM6DSO_ODR_FSM_104Hz:
         *val = LSM6DSO_ODR_FSM_104Hz;
-        break;
-      case LSM6DSO_ODR_FSM_208Hz:
-        *val = LSM6DSO_ODR_FSM_208Hz;
-        break;
-      case LSM6DSO_ODR_FSM_416Hz:
-        *val = LSM6DSO_ODR_FSM_416Hz;
         break;
       default:
         *val = LSM6DSO_ODR_FSM_12Hz5;
@@ -8017,20 +8041,21 @@ int32_t lsm6dso_fsm_init_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *         the FSM generates an interrupt.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that contains data to write
+  * @param  val      the value of long counter
   *
   */
-int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint16_t val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L, &buff[index]);
+  add_h = (uint8_t)( ( val & 0xFF00U ) >> 8 );
+  add_l = (uint8_t)( val & 0x00FFU );
+
+  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H,
-                                   &buff[index]);
+    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H, &add_h);
   }
 
   return ret;
@@ -8042,21 +8067,22 @@ int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   *         When the long counter value reached this value,
   *         the FSM generates an interrupt.[get]
   *
-  * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  ctx     read / write interface definitions
+  * @param  val     buffer that stores the value of long counter
   *
   */
-int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint16_t *val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L, &buff[index]);
+  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H,
-                                  &buff[index]);
+    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H, &add_h);
+    *val = add_h;
+    *val = *val << 8;
+    *val += add_l;
   }
 
   return ret;
@@ -8066,14 +8092,14 @@ int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @brief  FSM number of programs register.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that contains data to write
+  * @param  val      value to write
   *
   */
-int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t val)
 {
   int32_t ret;
 
-  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_PROGRAMS, buff);
+  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_PROGRAMS, &val);
 
   return ret;
 }
@@ -8082,14 +8108,14 @@ int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @brief  FSM number of programs register.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  val      buffer that stores data read.
   *
   */
-int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *val)
 {
   int32_t ret;
 
-  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_PROGRAMS, buff);
+  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_PROGRAMS, val);
 
   return ret;
 }
@@ -8099,20 +8125,21 @@ int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   *         First available address is 0x033C.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that contains data to write
+  * @param  val      the value of start address
   *
   */
-int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint16_t val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_L, &buff[index]);
+  add_h = (uint8_t)( ( val & 0xFF00U ) >> 8 );
+  add_l = (uint8_t)( val & 0x00FFU );
+
+  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_H,
-                                   &buff[index]);
+    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_H, &add_h);
   }
   return ret;
 }
@@ -8122,19 +8149,21 @@ int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   *         First available address is 0x033C.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  val      buffer the value of start address.
   *
   */
-int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint16_t *val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_L, buff);
+  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_H, buff);
+    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_H, &add_h);
+    *val = add_h;
+    *val = *val << 8;
+    *val += add_l;
   }
   return ret;
 }
@@ -8153,20 +8182,21 @@ int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
 */
 
 /**
-* @brief  Sensor hub output registers.[get]
-*
-* @param  ctx      read / write interface definitions
-* @param  val      union of registers from SENSOR_HUB_1 to SENSOR_HUB_18
-*
+  * @brief  Sensor hub output registers.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      values read from registers SENSOR_HUB_1 to SENSOR_HUB_18
+  * @param  len      number of consecutive register to read (max 18)
+  *
   */
-int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx,
-                                     lsm6dso_emb_sh_read_t *val)
+int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx, uint8_t *val,
+                                     uint8_t len)
 {
   int32_t ret;
 
   ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_SENSOR_HUB_BANK);
   if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_SENSOR_HUB_1, (uint8_t*) val, 18U);
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_SENSOR_HUB_1, (uint8_t*) val, len);
   }
   if (ret == 0) {
     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
