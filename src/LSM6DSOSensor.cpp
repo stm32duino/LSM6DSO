@@ -330,8 +330,8 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Get_X_ODR(float *Odr)
       *Odr = 0.0f;
       break;
 
-    case LSM6DSO_XL_ODR_6Hz5:
-      *Odr = 6.5f;
+    case LSM6DSO_XL_ODR_1Hz6:
+      *Odr = 1.6f;
       break;
 
     case LSM6DSO_XL_ODR_12Hz5:
@@ -389,15 +389,200 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Get_X_ODR(float *Odr)
  */
 LSM6DSOStatusTypeDef LSM6DSOSensor::Set_X_ODR(float Odr)
 {
+  return Set_X_ODR_With_Mode(Odr, LSM6DSO_ACC_HIGH_PERFORMANCE_MODE);
+}
+
+/**
+ * @brief  Set the LSM6DSO accelerometer sensor output data rate with operating mode
+ * @param  Odr the output data rate value to be set
+ * @param  Mode the accelerometer operating mode
+ * @note   This function switches off the gyroscope if Ultra Low Power Mode is set
+ * @retval 0 in case of success, an error code otherwise
+ */
+LSM6DSOStatusTypeDef LSM6DSOSensor::Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mode_t Mode)
+{
+  LSM6DSOStatusTypeDef ret = LSM6DSO_OK;
+
+  switch (Mode)
+  {
+    case LSM6DSO_ACC_HIGH_PERFORMANCE_MODE:
+    {
+      /* We must uncheck Low Power and Ultra Low Power bits if they are enabled */
+      lsm6dso_ctrl5_c_t val1;
+      lsm6dso_ctrl6_c_t val2;
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (val1.xl_ulp_en)
+      {
+        /* Power off the accelerometer */
+        if (acc_is_enabled == 1U)
+        {
+          if (lsm6dso_xl_data_rate_set(&reg_ctx, LSM6DSO_XL_ODR_OFF) != LSM6DSO_OK)
+          {
+            return LSM6DSO_ERROR;
+          }
+        }
+
+        val1.xl_ulp_en = 0;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (val2.xl_hm_mode)
+      {
+        val2.xl_hm_mode = 0;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      /* ODR should be at least 12.5Hz */
+      if (Odr < 12.5f)
+      {
+        Odr = 12.5f;
+      }
+      break;
+    }
+    case LSM6DSO_ACC_LOW_POWER_NORMAL_MODE:
+    {
+      /* We must uncheck Ultra Low Power bit if it is enabled */
+      /* and check the Low Power bit if it is unchecked       */
+      lsm6dso_ctrl5_c_t val1;
+      lsm6dso_ctrl6_c_t val2;
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (val1.xl_ulp_en)
+      {
+        /* Power off the accelerometer */
+        if (acc_is_enabled == 1U)
+        {
+          if (lsm6dso_xl_data_rate_set(&reg_ctx, LSM6DSO_XL_ODR_OFF) != LSM6DSO_OK)
+          {
+            return LSM6DSO_ERROR;
+          }
+        }
+
+        val1.xl_ulp_en = 0;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (!val2.xl_hm_mode)
+      {
+        val2.xl_hm_mode = 1U;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      /* Now we need to limit the ODR to 208 Hz if it is higher */
+      if (Odr > 208.0f)
+      {
+        Odr = 208.0f;
+      }
+      break;
+    }
+    case LSM6DSO_ACC_ULTRA_LOW_POWER_MODE:
+    {
+      /* We must uncheck Low Power bit if it is enabled                   */
+      /* and check the Ultra Low Power bit if it is unchecked             */
+      /* We must switch off gyro otherwise Ultra Low Power does not work  */
+      lsm6dso_ctrl5_c_t val1;
+      lsm6dso_ctrl6_c_t val2;
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (val2.xl_hm_mode)
+      {
+        val2.xl_hm_mode = 0;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      /* Disable Gyro */
+      if (gyro_is_enabled == 1U)
+      {
+        if (Disable_G() != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (!val1.xl_ulp_en)
+      {
+        /* Power off the accelerometer */
+        if (acc_is_enabled == 1U)
+        {
+          if (lsm6dso_xl_data_rate_set(&reg_ctx, LSM6DSO_XL_ODR_OFF) != LSM6DSO_OK)
+          {
+            return LSM6DSO_ERROR;
+          }
+        }
+
+        val1.xl_ulp_en = 1U;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      /* Now we need to limit the ODR to 208 Hz if it is higher */
+      if (Odr > 208.0f)
+      {
+        Odr = 208.0f;
+      }
+      break;
+    }
+    default:
+      ret = LSM6DSO_ERROR;
+      break;
+  }
+  
   /* Check if the component is enabled */
   if (acc_is_enabled == 1U)
   {
-    return Set_X_ODR_When_Enabled(Odr);
+    ret = Set_X_ODR_When_Enabled(Odr);
   }
   else
   {
-    return Set_X_ODR_When_Disabled(Odr);
+    ret = Set_X_ODR_When_Disabled(Odr);
   }
+
+  return ret;
 }
 
 /**
@@ -409,7 +594,8 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Set_X_ODR_When_Enabled(float Odr)
 {
   lsm6dso_odr_xl_t new_odr;
 
-  new_odr = (Odr <=   12.5f) ? LSM6DSO_XL_ODR_12Hz5
+  new_odr = (Odr <=    1.6f) ? LSM6DSO_XL_ODR_1Hz6
+          : (Odr <=   12.5f) ? LSM6DSO_XL_ODR_12Hz5
           : (Odr <=   26.0f) ? LSM6DSO_XL_ODR_26Hz
           : (Odr <=   52.0f) ? LSM6DSO_XL_ODR_52Hz
           : (Odr <=  104.0f) ? LSM6DSO_XL_ODR_104Hz
@@ -436,16 +622,17 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Set_X_ODR_When_Enabled(float Odr)
  */
 LSM6DSOStatusTypeDef LSM6DSOSensor::Set_X_ODR_When_Disabled(float Odr)
 {
-        acc_odr = (Odr <=   12.5f) ? LSM6DSO_XL_ODR_12Hz5
-                : (Odr <=   26.0f) ? LSM6DSO_XL_ODR_26Hz
-                : (Odr <=   52.0f) ? LSM6DSO_XL_ODR_52Hz
-                : (Odr <=  104.0f) ? LSM6DSO_XL_ODR_104Hz
-                : (Odr <=  208.0f) ? LSM6DSO_XL_ODR_208Hz
-                : (Odr <=  417.0f) ? LSM6DSO_XL_ODR_417Hz
-                : (Odr <=  833.0f) ? LSM6DSO_XL_ODR_833Hz
-                : (Odr <= 1667.0f) ? LSM6DSO_XL_ODR_1667Hz
-                : (Odr <= 3333.0f) ? LSM6DSO_XL_ODR_3333Hz
-                :                    LSM6DSO_XL_ODR_6667Hz;
+  acc_odr = (Odr <=    1.6f) ? LSM6DSO_XL_ODR_1Hz6
+          : (Odr <=   12.5f) ? LSM6DSO_XL_ODR_12Hz5
+          : (Odr <=   26.0f) ? LSM6DSO_XL_ODR_26Hz
+          : (Odr <=   52.0f) ? LSM6DSO_XL_ODR_52Hz
+          : (Odr <=  104.0f) ? LSM6DSO_XL_ODR_104Hz
+          : (Odr <=  208.0f) ? LSM6DSO_XL_ODR_208Hz
+          : (Odr <=  417.0f) ? LSM6DSO_XL_ODR_417Hz
+          : (Odr <=  833.0f) ? LSM6DSO_XL_ODR_833Hz
+          : (Odr <= 1667.0f) ? LSM6DSO_XL_ODR_1667Hz
+          : (Odr <= 3333.0f) ? LSM6DSO_XL_ODR_3333Hz
+          :                    LSM6DSO_XL_ODR_6667Hz;
 
   return LSM6DSO_OK;
 }
@@ -505,9 +692,9 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Set_X_FS(int32_t FullScale)
   /* Seems like MISRA C-2012 rule 14.3a violation but only from single file statical analysis point of view because
      the parameter passed to the function is not known at the moment of analysis */
   new_fs = (FullScale <= 2) ? LSM6DSO_2g
-           : (FullScale <= 4) ? LSM6DSO_4g
-           : (FullScale <= 8) ? LSM6DSO_8g
-           :                    LSM6DSO_16g;
+         : (FullScale <= 4) ? LSM6DSO_4g
+         : (FullScale <= 8) ? LSM6DSO_8g
+         :                    LSM6DSO_16g;
 
   if (lsm6dso_xl_full_scale_set(&reg_ctx, new_fs) != LSM6DSO_OK)
   {
@@ -749,15 +936,83 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Get_G_ODR(float *Odr)
  */
 LSM6DSOStatusTypeDef LSM6DSOSensor::Set_G_ODR(float Odr)
 {
+  return Set_G_ODR_With_Mode(Odr, LSM6DSO_GYRO_HIGH_PERFORMANCE_MODE);
+}
+
+/**
+ * @brief  Set the LSM6DSO gyroscope sensor output data rate with operating mode
+ * @param  Odr the output data rate value to be set
+ * @param  Mode the gyroscope operating mode
+ * @retval 0 in case of success, an error code otherwise
+ */
+LSM6DSOStatusTypeDef LSM6DSOSensor::Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_Mode_t Mode)
+{
+  LSM6DSOStatusTypeDef ret = LSM6DSO_OK;
+
+  switch (Mode)
+  {
+    case LSM6DSO_GYRO_HIGH_PERFORMANCE_MODE:
+    {
+      /* We must uncheck Low Power bit if it is enabled */
+      lsm6dso_ctrl7_g_t val1;
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (val1.g_hm_mode)
+      {
+        val1.g_hm_mode = 0;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+      break;
+    }
+    case LSM6DSO_GYRO_LOW_POWER_NORMAL_MODE:
+    {
+      /* We must check the Low Power bit if it is unchecked */
+      lsm6dso_ctrl7_g_t val1;
+
+      if (lsm6dso_read_reg(&reg_ctx, LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+      {
+        return LSM6DSO_ERROR;
+      }
+
+      if (!val1.g_hm_mode)
+      {
+        val1.g_hm_mode = 1U;
+        if (lsm6dso_write_reg(&reg_ctx, LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1) != LSM6DSO_OK)
+        {
+          return LSM6DSO_ERROR;
+        }
+      }
+
+      /* Now we need to limit the ODR to 208 Hz if it is higher */
+      if (Odr > 208.0f)
+      {
+        Odr = 208.0f;
+      }
+      break;
+    }
+    default:
+      ret = LSM6DSO_ERROR;
+      break;
+  }
+
   /* Check if the component is enabled */
   if (gyro_is_enabled == 1U)
   {
-    return Set_G_ODR_When_Enabled(Odr);
+    ret = Set_G_ODR_When_Enabled(Odr);
   }
   else
   {
-    return Set_G_ODR_When_Disabled(Odr);
+    ret = Set_G_ODR_When_Disabled(Odr);
   }
+
+  return ret;
 }
 
 /**
@@ -797,15 +1052,15 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Set_G_ODR_When_Enabled(float Odr)
 LSM6DSOStatusTypeDef LSM6DSOSensor::Set_G_ODR_When_Disabled(float Odr)
 {
   gyro_odr = (Odr <=   12.5f) ? LSM6DSO_GY_ODR_12Hz5
-                 : (Odr <=   26.0f) ? LSM6DSO_GY_ODR_26Hz
-                 : (Odr <=   52.0f) ? LSM6DSO_GY_ODR_52Hz
-                 : (Odr <=  104.0f) ? LSM6DSO_GY_ODR_104Hz
-                 : (Odr <=  208.0f) ? LSM6DSO_GY_ODR_208Hz
-                 : (Odr <=  417.0f) ? LSM6DSO_GY_ODR_417Hz
-                 : (Odr <=  833.0f) ? LSM6DSO_GY_ODR_833Hz
-                 : (Odr <= 1667.0f) ? LSM6DSO_GY_ODR_1667Hz
-                 : (Odr <= 3333.0f) ? LSM6DSO_GY_ODR_3333Hz
-                 :                    LSM6DSO_GY_ODR_6667Hz;
+           : (Odr <=   26.0f) ? LSM6DSO_GY_ODR_26Hz
+           : (Odr <=   52.0f) ? LSM6DSO_GY_ODR_52Hz
+           : (Odr <=  104.0f) ? LSM6DSO_GY_ODR_104Hz
+           : (Odr <=  208.0f) ? LSM6DSO_GY_ODR_208Hz
+           : (Odr <=  417.0f) ? LSM6DSO_GY_ODR_417Hz
+           : (Odr <=  833.0f) ? LSM6DSO_GY_ODR_833Hz
+           : (Odr <= 1667.0f) ? LSM6DSO_GY_ODR_1667Hz
+           : (Odr <= 3333.0f) ? LSM6DSO_GY_ODR_3333Hz
+           :                    LSM6DSO_GY_ODR_6667Hz;
 
   return LSM6DSO_OK;
 }
@@ -867,10 +1122,10 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Set_G_FS(int32_t FullScale)
   lsm6dso_fs_g_t new_fs;
 
   new_fs = (FullScale <= 125)  ? LSM6DSO_125dps
-           : (FullScale <= 250)  ? LSM6DSO_250dps
-           : (FullScale <= 500)  ? LSM6DSO_500dps
-           : (FullScale <= 1000) ? LSM6DSO_1000dps
-           :                       LSM6DSO_2000dps;
+         : (FullScale <= 250)  ? LSM6DSO_250dps
+         : (FullScale <= 500)  ? LSM6DSO_500dps
+         : (FullScale <= 1000) ? LSM6DSO_1000dps
+         :                       LSM6DSO_2000dps;
 
   if (lsm6dso_gy_full_scale_set(&reg_ctx, new_fs) != LSM6DSO_OK)
   {
@@ -1044,23 +1299,23 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Free_Fall_Detection(LSM6DSO_SensorInt
         return LSM6DSO_ERROR;
       }
 
-      val1.md1_cfg.int1_ff = PROPERTY_ENABLE;
+      val1.free_fall = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+      if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
       break;
 
     case LSM6DSO_INT2_PIN:
-      if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
 
-      val2.md2_cfg.int2_ff = PROPERTY_ENABLE;
+      val2.free_fall = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
@@ -1089,21 +1344,21 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Free_Fall_Detection()
     return LSM6DSO_ERROR;
   }
 
-  val1.md1_cfg.int1_ff = PROPERTY_DISABLE;
+  val1.free_fall = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  val2.md2_cfg.int2_ff = PROPERTY_DISABLE;
+  val2.free_fall = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1161,7 +1416,8 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Set_Free_Fall_Duration(uint8_t Duration)
  */
 LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Pedometer()
 {
-	lsm6dso_pin_int1_route_t val;
+  lsm6dso_pin_int1_route_t val;
+  lsm6dso_emb_sens_t emb_sens;
 
   /* Output Data Rate selection */
   if (Set_X_ODR(26.0f) != LSM6DSO_OK)
@@ -1175,8 +1431,31 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Pedometer()
     return LSM6DSO_ERROR;
   }
 
+  /* Save current embedded features */
+  if (lsm6dso_embedded_sens_get(&reg_ctx, &emb_sens) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Turn off embedded features */
+  if (lsm6dso_embedded_sens_off(&reg_ctx) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Wait for 10 ms */
+  delay(10);
+
   /* Enable pedometer algorithm. */
+  emb_sens.step = PROPERTY_ENABLE;
+
   if (lsm6dso_pedo_sens_set(&reg_ctx, LSM6DSO_PEDO_BASE_MODE) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Turn on embedded features */
+  if (lsm6dso_embedded_sens_set(&reg_ctx, &emb_sens) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1187,9 +1466,9 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Pedometer()
     return LSM6DSO_ERROR;
   }
 
-  val.emb_func_int1.int1_step_detector = PROPERTY_ENABLE;
+  val.step_detector = PROPERTY_ENABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1204,6 +1483,7 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Pedometer()
 LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Pedometer()
 {
   lsm6dso_pin_int1_route_t val1;
+  lsm6dso_emb_sens_t emb_sens;
 
   /* Disable step detector on INT1 pin */
   if (lsm6dso_pin_int1_route_get(&reg_ctx, &val1) != LSM6DSO_OK)
@@ -1211,15 +1491,23 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Pedometer()
     return LSM6DSO_ERROR;
   }
 
-  val1.emb_func_int1.int1_step_detector = PROPERTY_DISABLE;
+  val1.step_detector = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Save current embedded features */
+  if (lsm6dso_embedded_sens_get(&reg_ctx, &emb_sens) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
   /* Disable pedometer algorithm. */
-  if (lsm6dso_pedo_sens_set(&reg_ctx, LSM6DSO_PEDO_DISABLE) != LSM6DSO_OK)
+  emb_sens.step = PROPERTY_DISABLE;
+
+  if (lsm6dso_embedded_sens_set(&reg_ctx, &emb_sens) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1266,6 +1554,7 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Tilt_Detection(LSM6DSO_SensorIntPin_t
   LSM6DSOStatusTypeDef ret = LSM6DSO_OK;
   lsm6dso_pin_int1_route_t val1;
   lsm6dso_pin_int2_route_t val2;
+  lsm6dso_emb_sens_t emb_sens;
 
   /* Output Data Rate selection */
   if (Set_X_ODR(26.0f) != LSM6DSO_OK)
@@ -1279,8 +1568,26 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Tilt_Detection(LSM6DSO_SensorIntPin_t
     return LSM6DSO_ERROR;
   }
 
-  /* Enable tilt calculation. */
-  if (lsm6dso_tilt_sens_set(&reg_ctx, PROPERTY_ENABLE) != LSM6DSO_OK)
+  /* Save current embedded features */
+  if (lsm6dso_embedded_sens_get(&reg_ctx, &emb_sens) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Turn off embedded features */
+  if (lsm6dso_embedded_sens_off(&reg_ctx) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Wait for 10 ms */
+  delay(10);
+
+  /* Enable tilt algorithm. */
+  emb_sens.tilt = PROPERTY_ENABLE;
+
+  /* Turn on embedded features */
+  if (lsm6dso_embedded_sens_set(&reg_ctx, &emb_sens) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1294,23 +1601,23 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Tilt_Detection(LSM6DSO_SensorIntPin_t
         return LSM6DSO_ERROR;
       }
 
-      val1.emb_func_int1.int1_tilt = PROPERTY_ENABLE;
+      val1.tilt = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+      if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
       break;
 
     case LSM6DSO_INT2_PIN:
-      if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
 
-      val2.emb_func_int2.int2_tilt = PROPERTY_ENABLE;
+      val2.tilt = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
@@ -1332,6 +1639,7 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Tilt_Detection()
 {
   lsm6dso_pin_int1_route_t val1;
   lsm6dso_pin_int2_route_t val2;
+  lsm6dso_emb_sens_t emb_sens;
 
   /* Disable tilt event on both INT1 and INT2 pins */
   if (lsm6dso_pin_int1_route_get(&reg_ctx, &val1) != LSM6DSO_OK)
@@ -1339,27 +1647,35 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Tilt_Detection()
     return LSM6DSO_ERROR;
   }
 
-  val1.emb_func_int1.int1_tilt = PROPERTY_DISABLE;
+  val1.tilt = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  val2.emb_func_int2.int2_tilt = PROPERTY_DISABLE;
+  val2.tilt = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  /* Disable tilt calculation. */
-  if (lsm6dso_tilt_sens_set(&reg_ctx, PROPERTY_DISABLE) != LSM6DSO_OK)
+  /* Save current embedded features */
+  if (lsm6dso_embedded_sens_get(&reg_ctx, &emb_sens) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Disable tilt algorithm. */
+  emb_sens.tilt = PROPERTY_DISABLE;
+
+  if (lsm6dso_embedded_sens_set(&reg_ctx, &emb_sens) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1411,23 +1727,23 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Wake_Up_Detection(LSM6DSO_SensorIntPi
         return LSM6DSO_ERROR;
       }
 
-      val1.md1_cfg.int1_wu = PROPERTY_ENABLE;
+      val1.wake_up = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+      if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
       break;
 
     case LSM6DSO_INT2_PIN:
-      if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
 
-      val2.md2_cfg.int2_wu = PROPERTY_ENABLE;
+      val2.wake_up = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
@@ -1448,8 +1764,8 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Wake_Up_Detection(LSM6DSO_SensorIntPi
  */
 LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Wake_Up_Detection()
 {
-	lsm6dso_pin_int1_route_t val1;
-	lsm6dso_pin_int2_route_t val2;
+  lsm6dso_pin_int1_route_t val1;
+  lsm6dso_pin_int2_route_t val2;
 
   /* Disable wake up event on both INT1 and INT2 pins */
   if (lsm6dso_pin_int1_route_get(&reg_ctx, &val1) != LSM6DSO_OK)
@@ -1457,21 +1773,21 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Wake_Up_Detection()
     return LSM6DSO_ERROR;
   }
 
-  val1.md1_cfg.int1_wu = PROPERTY_DISABLE;
+  val1.wake_up = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  val2.md2_cfg.int2_wu = PROPERTY_DISABLE;
+  val2.wake_up = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1595,23 +1911,23 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Single_Tap_Detection(LSM6DSO_SensorIn
         return LSM6DSO_ERROR;
       }
 
-      val1.md1_cfg.int1_single_tap = PROPERTY_ENABLE;
+      val1.single_tap = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+      if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
       break;
 
     case LSM6DSO_INT2_PIN:
-      if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
 
-      val2.md2_cfg.int2_single_tap = PROPERTY_ENABLE;
+      val2.single_tap = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
@@ -1632,8 +1948,8 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Single_Tap_Detection(LSM6DSO_SensorIn
  */
 LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Single_Tap_Detection()
 {
-	lsm6dso_pin_int1_route_t val1;
-	lsm6dso_pin_int2_route_t val2;
+  lsm6dso_pin_int1_route_t val1;
+  lsm6dso_pin_int2_route_t val2;
 
   /* Disable single tap event on both INT1 and INT2 pins */
   if (lsm6dso_pin_int1_route_get(&reg_ctx, &val1) != LSM6DSO_OK)
@@ -1641,21 +1957,21 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Single_Tap_Detection()
     return LSM6DSO_ERROR;
   }
 
-  val1.md1_cfg.int1_single_tap = PROPERTY_DISABLE;
+  val1.single_tap = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  val2.md2_cfg.int2_single_tap = PROPERTY_DISABLE;
+  val2.single_tap = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1779,23 +2095,23 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_Double_Tap_Detection(LSM6DSO_SensorIn
         return LSM6DSO_ERROR;
       }
 
-      val1.md1_cfg.int1_double_tap = PROPERTY_ENABLE;
+      val1.double_tap = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+      if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
       break;
 
     case LSM6DSO_INT2_PIN:
-      if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
 
-      val2.md2_cfg.int2_double_tap = PROPERTY_ENABLE;
+      val2.double_tap = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
@@ -1824,21 +2140,21 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_Double_Tap_Detection()
     return LSM6DSO_ERROR;
   }
 
-  val1.md1_cfg.int1_double_tap = PROPERTY_DISABLE;
+  val1.double_tap = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  val2.md2_cfg.int2_double_tap = PROPERTY_DISABLE;
+  val2.double_tap = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
@@ -1996,23 +2312,23 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Enable_6D_Orientation(LSM6DSO_SensorIntPin_t
         return LSM6DSO_ERROR;
       }
 
-      val1.md1_cfg.int1_6d = PROPERTY_ENABLE;
+      val1.six_d = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+      if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
       break;
 
     case LSM6DSO_INT2_PIN:
-      if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
 
-      val2.md2_cfg.int2_6d = PROPERTY_ENABLE;
+      val2.six_d = PROPERTY_ENABLE;
 
-      if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+      if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
       {
         return LSM6DSO_ERROR;
       }
@@ -2041,21 +2357,21 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Disable_6D_Orientation()
     return LSM6DSO_ERROR;
   }
 
-  val1.md1_cfg.int1_6d = PROPERTY_DISABLE;
+  val1.six_d = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int1_route_set(&reg_ctx, &val1) != LSM6DSO_OK)
+  if (lsm6dso_pin_int1_route_set(&reg_ctx, val1) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  if (lsm6dso_pin_int2_route_get(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_get(&reg_ctx, NULL, &val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
 
-  val2.md2_cfg.int2_6d = PROPERTY_DISABLE;
+  val2.six_d = PROPERTY_DISABLE;
 
-  if (lsm6dso_pin_int2_route_set(&reg_ctx, &val2) != LSM6DSO_OK)
+  if (lsm6dso_pin_int2_route_set(&reg_ctx, NULL, val2) != LSM6DSO_OK)
   {
     return LSM6DSO_ERROR;
   }
