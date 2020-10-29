@@ -1,43 +1,26 @@
 /*
  ******************************************************************************
  * @file    lsm6dso_reg.h
- * @author  Sensor Solutions Software Team
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          lsm6dso_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
-*/
+ ******************************************************************************
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef LSM6DSO_DRIVER_H
-#define LSM6DSO_DRIVER_H
+#ifndef LSM6DSO_REGS_H
+#define LSM6DSO_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -45,6 +28,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <stddef.h>
 #include <math.h>
 
 /** @addtogroup LSM6DSO
@@ -52,7 +36,7 @@
   *
   */
 
-/** @defgroup LSM6DSO_sensors_common_types
+/** @defgroup STMicroelectronics sensors common types
   * @{
   *
   */
@@ -72,24 +56,24 @@
   *
   */
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
+typedef union {
+    int16_t i16bit[3];
+    uint8_t u8bit[6];
 } axis3bit16_t;
 
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
+typedef union {
+    int16_t i16bit;
+    uint8_t u8bit[2];
 } axis1bit16_t;
 
-typedef union{
-  int32_t i32bit[3];
-  uint8_t u8bit[12];
+typedef union {
+    int32_t i32bit[3];
+    uint8_t u8bit[12];
 } axis3bit32_t;
 
-typedef union{
-  int32_t i32bit;
-  uint8_t u8bit[4];
+typedef union {
+    int32_t i32bit;
+    uint8_t u8bit[4];
 } axis1bit32_t;
 
 /**
@@ -97,21 +81,47 @@ typedef union{
   *
   */
 
-typedef struct{
-  uint8_t bit0       : 1;
-  uint8_t bit1       : 1;
-  uint8_t bit2       : 1;
-  uint8_t bit3       : 1;
-  uint8_t bit4       : 1;
-  uint8_t bit5       : 1;
-  uint8_t bit6       : 1;
-  uint8_t bit7       : 1;
+typedef struct {
+    uint8_t bit0       : 1;
+    uint8_t bit1       : 1;
+    uint8_t bit2       : 1;
+    uint8_t bit3       : 1;
+    uint8_t bit4       : 1;
+    uint8_t bit5       : 1;
+    uint8_t bit6       : 1;
+    uint8_t bit7       : 1;
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
 #define PROPERTY_ENABLE                 (1U)
 
 #endif /* MEMS_SHARED_TYPES */
+
+#ifndef MEMS_UCF_SHARED_TYPES
+#define MEMS_UCF_SHARED_TYPES
+
+/** @defgroup    Generic address-data structure definition
+  * @brief       This structure is useful to load a predefined configuration
+  *              of a sensor.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
+  *
+  * @{
+  *
+  */
+
+typedef struct {
+  uint8_t address;
+  uint8_t data;
+} ucf_line_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_UCF_SHARED_TYPES */
 
 /**
   * @}
@@ -126,15 +136,15 @@ typedef struct{
   *
   */
 
-typedef int32_t (*lsm6dso_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*lsm6dso_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*lsm6dso_write_ptr)(void *, uint8_t, uint8_t *, uint16_t);
+typedef int32_t (*lsm6dso_read_ptr)(void *, uint8_t, uint8_t *, uint16_t);
 
 typedef struct {
-  /** Component mandatory fields **/
-  lsm6dso_write_ptr  write_reg;
-  lsm6dso_read_ptr   read_reg;
-  /** Customizable optional pointer **/
-  void *handle;
+    /** Component mandatory fields **/
+    lsm6dso_write_ptr  write_reg;
+    lsm6dso_read_ptr   read_reg;
+    /** Customizable optional pointer **/
+    void *handle;
 } lsm6dso_ctx_t;
 
 /**
@@ -438,14 +448,14 @@ typedef struct {
 
 #define LSM6DSO_FSM_STATUS_B_MAINPAGE        0x37U
 typedef struct {
-  uint8_t IS_FSM9                 : 1;
-  uint8_t IS_FSM10                : 1;
-  uint8_t IS_FSM11                : 1;
-  uint8_t IS_FSM12                : 1;
-  uint8_t IS_FSM13                : 1;
-  uint8_t IS_FSM14                : 1;
-  uint8_t IS_FSM15                : 1;
-  uint8_t IS_FSM16                : 1;
+  uint8_t is_fsm9                 : 1;
+  uint8_t is_fsm10                : 1;
+  uint8_t is_fsm11                : 1;
+  uint8_t is_fsm12                : 1;
+  uint8_t is_fsm13                : 1;
+  uint8_t is_fsm14                : 1;
+  uint8_t is_fsm15                : 1;
+  uint8_t is_fsm16                : 1;
 } lsm6dso_fsm_status_b_mainpage_t;
 
 #define LSM6DSO_STATUS_MASTER_MAINPAGE       0x39U
@@ -771,7 +781,7 @@ typedef struct {
   uint8_t emb_func_lir             : 1;
 } lsm6dso_page_rw_t;
 
-#define LSM6DSO_EMB_FUNC_FIFO_CFG			       0x44U
+#define LSM6DSO_EMB_FUNC_FIFO_CFG             0x44U
 typedef struct {
   uint8_t not_used_00              : 6;
   uint8_t pedo_fifo_en             : 1;
@@ -1481,7 +1491,7 @@ typedef union{
   lsm6dso_fsm_status_a_t                  fsm_status_a;
   lsm6dso_fsm_status_b_t                  fsm_status_b;
   lsm6dso_page_rw_t                       page_rw;
-  lsm6dso_emb_func_fifo_cfg_t	            emb_func_fifo_cfg;
+  lsm6dso_emb_func_fifo_cfg_t              emb_func_fifo_cfg;
   lsm6dso_fsm_enable_a_t                  fsm_enable_a;
   lsm6dso_fsm_enable_b_t                  fsm_enable_b;
   lsm6dso_fsm_long_counter_clear_t        fsm_long_counter_clear;
@@ -1555,17 +1565,17 @@ int32_t lsm6dso_read_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lsm6dso_write_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float lsm6dso_from_fs2_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs4_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs8_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs16_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs125_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs500_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs250_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs1000_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs2000_to_mdps(int16_t lsb);
-extern float lsm6dso_from_lsb_to_celsius(int16_t lsb);
-extern float lsm6dso_from_lsb_to_nsec(int16_t lsb);
+extern float_t lsm6dso_from_fs2_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs4_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs8_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs16_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs125_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs500_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs250_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs1000_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs2000_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_lsb_to_celsius(int16_t lsb);
+extern float_t lsm6dso_from_lsb_to_nsec(int16_t lsb);
 
 typedef enum {
   LSM6DSO_2g   = 0,
@@ -1588,7 +1598,7 @@ typedef enum {
   LSM6DSO_XL_ODR_1667Hz = 8,
   LSM6DSO_XL_ODR_3333Hz = 9,
   LSM6DSO_XL_ODR_6667Hz = 10,
-  LSM6DSO_XL_ODR_6Hz5   = 11, /* (low power only) */
+  LSM6DSO_XL_ODR_1Hz6   = 11, /* (low power only) */
 } lsm6dso_odr_xl_t;
 int32_t lsm6dso_xl_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_odr_xl_t val);
 int32_t lsm6dso_xl_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_odr_xl_t *val);
@@ -1650,19 +1660,6 @@ int32_t lsm6dso_gy_power_mode_set(lsm6dso_ctx_t *ctx,
 int32_t lsm6dso_gy_power_mode_get(lsm6dso_ctx_t *ctx,
                                   lsm6dso_g_hm_mode_t *val);
 
-typedef struct {
-  lsm6dso_all_int_src_t       all_int_src;
-  lsm6dso_wake_up_src_t       wake_up_src;
-  lsm6dso_tap_src_t           tap_src;
-  lsm6dso_d6d_src_t           d6d_src;
-  lsm6dso_status_reg_t        status_reg;
-  lsm6dso_emb_func_status_t   emb_func_status;
-  lsm6dso_fsm_status_a_t      fsm_status_a;
-  lsm6dso_fsm_status_b_t      fsm_status_b;
-} lsm6dso_all_sources_t;
-int32_t lsm6dso_all_sources_get(lsm6dso_ctx_t *ctx,
-                                lsm6dso_all_sources_t *val);
-
 int32_t lsm6dso_status_reg_get(lsm6dso_ctx_t *ctx,
                                lsm6dso_status_reg_t *val);
 
@@ -1683,6 +1680,8 @@ int32_t lsm6dso_xl_usr_offset_z_get(lsm6dso_ctx_t *ctx, uint8_t *buff);
 
 int32_t lsm6dso_xl_usr_offset_set(lsm6dso_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_xl_usr_offset_get(lsm6dso_ctx_t *ctx, uint8_t *val);
+
+int32_t lsm6dso_timestamp_rst(lsm6dso_ctx_t *ctx);
 
 int32_t lsm6dso_timestamp_set(lsm6dso_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_timestamp_get(lsm6dso_ctx_t *ctx, uint8_t *val);
@@ -2056,30 +2055,6 @@ int32_t lsm6dso_int1_mode_set(lsm6dso_ctx_t *ctx,
 int32_t lsm6dso_int1_mode_get(lsm6dso_ctx_t *ctx,
                               lsm6dso_int1_pd_en_t *val);
 
-typedef struct {
-    lsm6dso_int1_ctrl_t          int1_ctrl;
-    lsm6dso_md1_cfg_t            md1_cfg;
-    lsm6dso_emb_func_int1_t      emb_func_int1;
-    lsm6dso_fsm_int1_a_t         fsm_int1_a;
-    lsm6dso_fsm_int1_b_t         fsm_int1_b;
-} lsm6dso_pin_int1_route_t;
-int32_t lsm6dso_pin_int1_route_set(lsm6dso_ctx_t *ctx,
-                                   lsm6dso_pin_int1_route_t *val);
-int32_t lsm6dso_pin_int1_route_get(lsm6dso_ctx_t *ctx,
-                                   lsm6dso_pin_int1_route_t *val);
-
-typedef struct {
-  lsm6dso_int2_ctrl_t          int2_ctrl;
-  lsm6dso_md2_cfg_t            md2_cfg;
-  lsm6dso_emb_func_int2_t      emb_func_int2;
-  lsm6dso_fsm_int2_a_t         fsm_int2_a;
-  lsm6dso_fsm_int2_b_t         fsm_int2_b;
-} lsm6dso_pin_int2_route_t;
-int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx,
-                                   lsm6dso_pin_int2_route_t *val);
-int32_t lsm6dso_pin_int2_route_get(lsm6dso_ctx_t *ctx,
-                                   lsm6dso_pin_int2_route_t *val);
-
 typedef enum {
   LSM6DSO_PUSH_PULL   = 0,
   LSM6DSO_OPEN_DRAIN  = 1,
@@ -2259,7 +2234,7 @@ int32_t lsm6dso_fifo_stop_on_wtm_set(lsm6dso_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_fifo_stop_on_wtm_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  LSM6DSO_XL_NOT_BATCHED     	=  0,
+  LSM6DSO_XL_NOT_BATCHED       =  0,
   LSM6DSO_XL_BATCHED_AT_12Hz5   =  1,
   LSM6DSO_XL_BATCHED_AT_26Hz    =  2,
   LSM6DSO_XL_BATCHED_AT_52Hz    =  3,
@@ -2331,7 +2306,7 @@ typedef enum {
 } lsm6dso_trig_counter_bdr_t;
 
 typedef enum {
-  LSM6DSO_GYRO_NC_TAG		= 1,
+  LSM6DSO_GYRO_NC_TAG    = 1,
   LSM6DSO_XL_NC_TAG,
   LSM6DSO_TEMPERATURE_TAG,
   LSM6DSO_TIMESTAMP_TAG,
@@ -2352,7 +2327,7 @@ typedef enum {
   LSM6DSO_GAME_ROTATION_TAG,
   LSM6DSO_GEOMAG_ROTATION_TAG,
   LSM6DSO_ROTATION_TAG,
-  LSM6DSO_SENSORHUB_NACK_TAG	= 0x19,
+  LSM6DSO_SENSORHUB_NACK_TAG  = 0x19,
 } lsm6dso_fifo_tag_t;
 int32_t lsm6dso_fifo_cnt_event_batch_set(lsm6dso_ctx_t *ctx,
                                           lsm6dso_trig_counter_bdr_t val);
@@ -2379,7 +2354,7 @@ int32_t lsm6dso_fifo_ovr_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dso_fifo_wtm_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dso_fifo_sensor_tag_get(lsm6dso_ctx_t *ctx,
-				    lsm6dso_fifo_tag_t *val);
+            lsm6dso_fifo_tag_t *val);
 
 int32_t lsm6dso_fifo_pedo_batch_set(lsm6dso_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_fifo_pedo_batch_get(lsm6dso_ctx_t *ctx, uint8_t *val);
@@ -2431,11 +2406,9 @@ int32_t lsm6dso_den_mark_axis_z_set(lsm6dso_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_den_mark_axis_z_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  LSM6DSO_PEDO_DISABLE              = 0x00,
-  LSM6DSO_PEDO_BASE_MODE            = 0x01,
-  LSM6DSO_PEDO_ADV_MODE             = 0x03,
-  LSM6DSO_FALSE_STEP_REJ            = 0x13,
-  LSM6DSO_FALSE_STEP_REJ_ADV_MODE   = 0x33,
+  LSM6DSO_PEDO_BASE_MODE            = 0x00,
+  LSM6DSO_FALSE_STEP_REJ            = 0x10,
+  LSM6DSO_FALSE_STEP_REJ_ADV_MODE   = 0x30,
 } lsm6dso_pedo_md_t;
 int32_t lsm6dso_pedo_sens_set(lsm6dso_ctx_t *ctx, lsm6dso_pedo_md_t val);
 int32_t lsm6dso_pedo_sens_get(lsm6dso_ctx_t *ctx, lsm6dso_pedo_md_t *val);
@@ -2459,14 +2432,8 @@ int32_t lsm6dso_pedo_int_mode_set(lsm6dso_ctx_t *ctx,
 int32_t lsm6dso_pedo_int_mode_get(lsm6dso_ctx_t *ctx,
                                   lsm6dso_carry_count_en_t *val);
 
-int32_t lsm6dso_motion_sens_set(lsm6dso_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso_motion_sens_get(lsm6dso_ctx_t *ctx, uint8_t *val);
-
 int32_t lsm6dso_motion_flag_data_ready_get(lsm6dso_ctx_t *ctx,
                                                 uint8_t *val);
-
-int32_t lsm6dso_tilt_sens_set(lsm6dso_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso_tilt_sens_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dso_tilt_flag_data_ready_get(lsm6dso_ctx_t *ctx,
                                               uint8_t *val);
@@ -2521,9 +2488,6 @@ int32_t lsm6dso_mag_x_orient_get(lsm6dso_ctx_t *ctx,
 
 int32_t lsm6dso_long_cnt_flag_data_ready_get(lsm6dso_ctx_t *ctx,
                                              uint8_t *val);
-
-int32_t lsm6dso_emb_fsm_en_set(lsm6dso_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso_emb_fsm_en_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
     lsm6dso_fsm_enable_a_t          fsm_enable_a;
@@ -2666,6 +2630,414 @@ int32_t lsm6dso_sh_slv3_cfg_read(lsm6dso_ctx_t *ctx,
 
 int32_t lsm6dso_sh_status_get(lsm6dso_ctx_t *ctx,
                               lsm6dso_status_master_t *val);
+
+
+typedef struct {
+  uint8_t ui;
+  uint8_t aux;
+} lsm6dso_id_t;
+int32_t lsm6dso_id_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                        lsm6dso_id_t *val);
+
+typedef struct {
+  enum {
+    LSM6DSO_SEL_BY_HW   = 0x00, /* bus mode select by HW (SPI 3W disable) */
+    LSM6DSO_SPI_4W      = 0x06, /* Only SPI: SDO / SDI separated pins */
+    LSM6DSO_SPI_3W      = 0x07, /* Only SPI: SDO / SDI share the same pin */
+    LSM6DSO_I2C         = 0x04, /* Only I2C */
+    LSM6DSO_I3C_T_50us  = 0x02, /* I3C: available time equal to 50 μs */
+    LSM6DSO_I3C_T_2us   = 0x12, /* I3C: available time equal to 2 μs */
+    LSM6DSO_I3C_T_1ms   = 0x22, /* I3C: available time equal to 1 ms */
+    LSM6DSO_I3C_T_25ms  = 0x32, /* I3C: available time equal to 25 ms */
+  } ui_bus_md;
+  enum {
+    LSM6DSO_SPI_4W_AUX  = 0x00,
+    LSM6DSO_SPI_3W_AUX  = 0x01,
+  } aux_bus_md;
+} lsm6dso_bus_mode_t;
+int32_t lsm6dso_bus_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                              lsm6dso_bus_mode_t val);
+int32_t lsm6dso_bus_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                              lsm6dso_bus_mode_t *val);
+
+typedef enum {
+  LSM6DSO_DRV_RDY   = 0x00, /* Initialize the device for driver usage */
+  LSM6DSO_BOOT      = 0x01, /* Restore calib. param. ( it takes 10ms ) */
+  LSM6DSO_RESET     = 0x02, /* Reset configuration registers */
+  LSM6DSO_FIFO_COMP = 0x04, /* FIFO compression initialization request. */
+  LSM6DSO_FSM       = 0x08, /* Finite State Machine initialization request */
+  LSM6DSO_PEDO      = 0x20, /* Pedometer algo initialization request. */
+  LSM6DSO_TILT      = 0x40, /* Tilt algo initialization request */
+  LSM6DSO_SMOTION   = 0x80, /* Significant Motion initialization request */
+} lsm6dso_init_t;
+int32_t lsm6dso_init_set(lsm6dso_ctx_t *ctx, lsm6dso_init_t val);
+
+typedef struct {
+  uint8_t sw_reset           : 1; /* Restoring configuration registers */
+  uint8_t boot               : 1; /* Restoring calibration parameters */
+  uint8_t drdy_xl            : 1; /* Accelerometer data ready */
+  uint8_t drdy_g             : 1; /* Gyroscope data ready */
+  uint8_t drdy_temp          : 1; /* Temperature data ready */
+  uint8_t ois_drdy_xl        : 1; /* Accelerometer data ready on OIS */
+  uint8_t ois_drdy_g         : 1; /* Gyroscope data ready on OIS */
+  uint8_t ois_gyro_settling  : 1; /* Gyroscope is in the settling phase */
+} lsm6dso_status_t;
+int32_t lsm6dso_status_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                            lsm6dso_status_t *val);
+
+typedef struct {
+  uint8_t sdo_sa0_pull_up     : 1; /* 1 = pull-up on SDO/SA0 pin */
+  uint8_t aux_sdo_ocs_pull_up : 1; /* 1 = pull-up on OCS_Aux/SDO_Aux pins */
+  uint8_t int1_int2_push_pull : 1; /* 1 = push-pull / 0 = open-drain*/
+  uint8_t int1_pull_down      : 1; /* 1 = pull-down always disabled (0=auto) */
+} lsm6dso_pin_conf_t;
+int32_t lsm6dso_pin_conf_set(lsm6dso_ctx_t *ctx, lsm6dso_pin_conf_t val);
+int32_t lsm6dso_pin_conf_get(lsm6dso_ctx_t *ctx, lsm6dso_pin_conf_t *val);
+
+typedef struct {
+  uint8_t active_low   : 1; /* 1 = active low / 0 = active high */
+  uint8_t base_latched : 1; /* base functions are: FF, WU, 6D, Tap, Act/Inac */
+  uint8_t emb_latched  : 1; /* emb functions are: Pedo, Tilt, SMot, Timestamp */
+} lsm6dso_int_mode_t;
+int32_t lsm6dso_interrupt_mode_set(lsm6dso_ctx_t *ctx,
+                                    lsm6dso_int_mode_t val);
+int32_t lsm6dso_interrupt_mode_get(lsm6dso_ctx_t *ctx,
+                                    lsm6dso_int_mode_t *val);
+
+typedef struct {
+  uint8_t drdy_xl       : 1; /* Accelerometer data ready */
+  uint8_t drdy_g        : 1; /* Gyroscope data ready */
+  uint8_t drdy_temp     : 1; /* Temperature data ready (1 = int2 pin disable) */
+  uint8_t boot          : 1; /* Restoring calibration parameters */
+  uint8_t fifo_th       : 1; /* FIFO threshold reached */
+  uint8_t fifo_ovr      : 1; /* FIFO overrun */
+  uint8_t fifo_full     : 1; /* FIFO full */
+  uint8_t fifo_bdr      : 1; /* FIFO Batch counter threshold reached */
+  uint8_t den_flag      : 1; /* external trigger level recognition (DEN) */
+  uint8_t sh_endop      : 1; /* sensor hub end operation */
+  uint8_t timestamp     : 1; /* timestamp overflow (1 = int2 pin disable) */
+  uint8_t six_d         : 1; /* orientation change (6D/4D detection) */
+  uint8_t double_tap    : 1; /* double-tap event */
+  uint8_t free_fall     : 1; /* free fall event */
+  uint8_t wake_up       : 1; /* wake up event */
+  uint8_t single_tap    : 1; /* single-tap event */
+  uint8_t sleep_change  : 1; /* Act/Inact (or Vice-versa) status changed */
+  uint8_t step_detector : 1; /* Step detected */
+  uint8_t tilt          : 1; /* Relative tilt event detected */
+  uint8_t sig_mot       : 1; /* "significant motion" event detected */
+  uint8_t fsm_lc        : 1; /* fsm long counter timeout interrupt event */
+  uint8_t fsm1          : 1; /* fsm 1 interrupt event */
+  uint8_t fsm2          : 1; /* fsm 2 interrupt event */
+  uint8_t fsm3          : 1; /* fsm 3 interrupt event */
+  uint8_t fsm4          : 1; /* fsm 4 interrupt event */
+  uint8_t fsm5          : 1; /* fsm 5 interrupt event */
+  uint8_t fsm6          : 1; /* fsm 6 interrupt event */
+  uint8_t fsm7          : 1; /* fsm 7 interrupt event */
+  uint8_t fsm8          : 1; /* fsm 8 interrupt event */
+  uint8_t fsm9          : 1; /* fsm 9 interrupt event */
+  uint8_t fsm10         : 1; /* fsm 10 interrupt event */
+  uint8_t fsm11         : 1; /* fsm 11 interrupt event */
+  uint8_t fsm12         : 1; /* fsm 12 interrupt event */
+  uint8_t fsm13         : 1; /* fsm 13 interrupt event */
+  uint8_t fsm14         : 1; /* fsm 14 interrupt event */
+  uint8_t fsm15         : 1; /* fsm 15 interrupt event */
+  uint8_t fsm16         : 1; /* fsm 16 interrupt event */
+  uint8_t mlc1          : 1; /* mlc 1 interrupt event */
+  uint8_t mlc2          : 1; /* mlc 2 interrupt event */
+  uint8_t mlc3          : 1; /* mlc 3 interrupt event */
+  uint8_t mlc4          : 1; /* mlc 4 interrupt event */
+  uint8_t mlc5          : 1; /* mlc 5 interrupt event */
+  uint8_t mlc6          : 1; /* mlc 6 interrupt event */
+  uint8_t mlc7          : 1; /* mlc 7 interrupt event */
+  uint8_t mlc8          : 1; /* mlc 8 interrupt event */
+} lsm6dso_pin_int1_route_t;
+
+int32_t lsm6dso_pin_int1_route_set(lsm6dso_ctx_t *ctx,
+                                   lsm6dso_pin_int1_route_t val);
+int32_t lsm6dso_pin_int1_route_get(lsm6dso_ctx_t *ctx,
+                                   lsm6dso_pin_int1_route_t *val);
+
+typedef struct {
+  uint8_t drdy_ois      : 1; /* OIS chain data ready */
+  uint8_t drdy_xl       : 1; /* Accelerometer data ready */
+  uint8_t drdy_g        : 1; /* Gyroscope data ready */
+  uint8_t drdy_temp     : 1; /* Temperature data ready */
+  uint8_t fifo_th       : 1; /* FIFO threshold reached */
+  uint8_t fifo_ovr      : 1; /* FIFO overrun */
+  uint8_t fifo_full     : 1; /* FIFO full */
+  uint8_t fifo_bdr      : 1; /* FIFO Batch counter threshold reached */
+  uint8_t timestamp     : 1; /* timestamp overflow */
+  uint8_t six_d         : 1; /* orientation change (6D/4D detection) */
+  uint8_t double_tap    : 1; /* double-tap event */
+  uint8_t free_fall     : 1; /* free fall event */
+  uint8_t wake_up       : 1; /* wake up event */
+  uint8_t single_tap    : 1; /* single-tap event */
+  uint8_t sleep_change  : 1; /* Act/Inact (or Vice-versa) status changed */
+  uint8_t step_detector : 1; /* Step detected */
+  uint8_t tilt          : 1; /* Relative tilt event detected */
+  uint8_t sig_mot       : 1; /* "significant motion" event detected */
+  uint8_t fsm_lc        : 1; /* fsm long counter timeout interrupt event */
+  uint8_t fsm1          : 1; /* fsm 1 interrupt event */
+  uint8_t fsm2          : 1; /* fsm 2 interrupt event */
+  uint8_t fsm3          : 1; /* fsm 3 interrupt event */
+  uint8_t fsm4          : 1; /* fsm 4 interrupt event */
+  uint8_t fsm5          : 1; /* fsm 5 interrupt event */
+  uint8_t fsm6          : 1; /* fsm 6 interrupt event */
+  uint8_t fsm7          : 1; /* fsm 7 interrupt event */
+  uint8_t fsm8          : 1; /* fsm 8 interrupt event */
+  uint8_t fsm9          : 1; /* fsm 9 interrupt event */
+  uint8_t fsm10         : 1; /* fsm 10 interrupt event */
+  uint8_t fsm11         : 1; /* fsm 11 interrupt event */
+  uint8_t fsm12         : 1; /* fsm 12 interrupt event */
+  uint8_t fsm13         : 1; /* fsm 13 interrupt event */
+  uint8_t fsm14         : 1; /* fsm 14 interrupt event */
+  uint8_t fsm15         : 1; /* fsm 15 interrupt event */
+  uint8_t fsm16         : 1; /* fsm 16 interrupt event */
+  uint8_t mlc1          : 1; /* mlc 1 interrupt event */
+  uint8_t mlc2          : 1; /* mlc 2 interrupt event */
+  uint8_t mlc3          : 1; /* mlc 3 interrupt event */
+  uint8_t mlc4          : 1; /* mlc 4 interrupt event */
+  uint8_t mlc5          : 1; /* mlc 5 interrupt event */
+  uint8_t mlc6          : 1; /* mlc 6 interrupt event */
+  uint8_t mlc7          : 1; /* mlc 7 interrupt event */
+  uint8_t mlc8          : 1; /* mlc 8 interrupt event */
+} lsm6dso_pin_int2_route_t;
+
+int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                                    lsm6dso_pin_int2_route_t val);
+int32_t lsm6dso_pin_int2_route_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                                    lsm6dso_pin_int2_route_t *val);
+
+typedef struct {
+  uint8_t drdy_xl          :  1; /* Accelerometer data ready */
+  uint8_t drdy_g           :  1; /* Gyroscope data ready */
+  uint8_t drdy_temp        :  1; /* Temperature data ready */
+  uint8_t den_flag         :  1; /* external trigger level recognition (DEN) */
+  uint8_t timestamp        :  1; /* timestamp overflow (1 = int2 pin disable) */
+  uint8_t free_fall        :  1; /* free fall event */
+  uint8_t wake_up          :  1; /* wake up event */
+  uint8_t wake_up_z        :  1; /* wake up on Z axis event */
+  uint8_t wake_up_y        :  1; /* wake up on Y axis event */
+  uint8_t wake_up_x        :  1; /* wake up on X axis event */
+  uint8_t single_tap       :  1; /* single-tap event */
+  uint8_t double_tap       :  1; /* double-tap event */
+  uint8_t tap_z            :  1; /* single-tap on Z axis event */
+  uint8_t tap_y            :  1; /* single-tap on Y axis event */
+  uint8_t tap_x            :  1; /* single-tap on X axis event */
+  uint8_t tap_sign         :  1; /* sign of tap event (0-pos / 1-neg) */
+  uint8_t six_d            :  1; /* orientation change (6D/4D detection) */
+  uint8_t six_d_xl         :  1; /* X-axis low 6D/4D event (under threshold) */
+  uint8_t six_d_xh         :  1; /* X-axis high 6D/4D event (over threshold) */
+  uint8_t six_d_yl         :  1; /* Y-axis low 6D/4D event (under threshold) */
+  uint8_t six_d_yh         :  1; /* Y-axis high 6D/4D event (over threshold) */
+  uint8_t six_d_zl         :  1; /* Z-axis low 6D/4D event (under threshold) */
+  uint8_t six_d_zh         :  1; /* Z-axis high 6D/4D event (over threshold) */
+  uint8_t sleep_change     :  1; /* Act/Inact (or Vice-versa) status changed */
+  uint8_t sleep_state      :  1; /* Act/Inact status flag (0-Act / 1-Inact) */
+  uint8_t step_detector    :  1; /* Step detected */
+  uint8_t tilt             :  1; /* Relative tilt event detected */
+  uint8_t sig_mot          :  1; /* "significant motion" event detected */
+  uint8_t fsm_lc           :  1; /* fsm long counter timeout interrupt event */
+  uint8_t fsm1             :  1; /* fsm 1 interrupt event */
+  uint8_t fsm2             :  1; /* fsm 2 interrupt event */
+  uint8_t fsm3             :  1; /* fsm 3 interrupt event */
+  uint8_t fsm4             :  1; /* fsm 4 interrupt event */
+  uint8_t fsm5             :  1; /* fsm 5 interrupt event */
+  uint8_t fsm6             :  1; /* fsm 6 interrupt event */
+  uint8_t fsm7             :  1; /* fsm 7 interrupt event */
+  uint8_t fsm8             :  1; /* fsm 8 interrupt event */
+  uint8_t fsm9             :  1; /* fsm 9 interrupt event */
+  uint8_t fsm10            :  1; /* fsm 10 interrupt event */
+  uint8_t fsm11            :  1; /* fsm 11 interrupt event */
+  uint8_t fsm12            :  1; /* fsm 12 interrupt event */
+  uint8_t fsm13            :  1; /* fsm 13 interrupt event */
+  uint8_t fsm14            :  1; /* fsm 14 interrupt event */
+  uint8_t fsm15            :  1; /* fsm 15 interrupt event */
+  uint8_t fsm16            :  1; /* fsm 16 interrupt event */
+  uint8_t mlc1             :  1; /* mlc 1 interrupt event */
+  uint8_t mlc2             :  1; /* mlc 2 interrupt event */
+  uint8_t mlc3             :  1; /* mlc 3 interrupt event */
+  uint8_t mlc4             :  1; /* mlc 4 interrupt event */
+  uint8_t mlc5             :  1; /* mlc 5 interrupt event */
+  uint8_t mlc6             :  1; /* mlc 6 interrupt event */
+  uint8_t mlc7             :  1; /* mlc 7 interrupt event */
+  uint8_t mlc8             :  1; /* mlc 8 interrupt event */
+  uint8_t sh_endop         :  1; /* sensor hub end operation */
+  uint8_t sh_slave0_nack   :  1; /* Not acknowledge on sensor hub slave 0 */
+  uint8_t sh_slave1_nack   :  1; /* Not acknowledge on sensor hub slave 1 */
+  uint8_t sh_slave2_nack   :  1; /* Not acknowledge on sensor hub slave 2 */
+  uint8_t sh_slave3_nack   :  1; /* Not acknowledge on sensor hub slave 3 */
+  uint8_t sh_wr_once       :  1; /* "WRITE_ONCE" end on sensor hub slave 0 */
+  uint16_t fifo_diff       : 10; /* Number of unread sensor data in FIFO*/
+  uint8_t fifo_ovr_latched :  1; /* Latched FIFO overrun status */
+  uint8_t fifo_bdr         :  1; /* FIFO Batch counter threshold reached */
+  uint8_t fifo_full        :  1; /* FIFO full */
+  uint8_t fifo_ovr         :  1; /* FIFO overrun */
+  uint8_t fifo_th          :  1; /* FIFO threshold reached */
+} lsm6dso_all_sources_t;
+int32_t lsm6dso_all_sources_get(lsm6dso_ctx_t *ctx,
+                                 lsm6dso_all_sources_t *val);
+
+typedef struct{
+  uint8_t odr_fine_tune;
+} dev_cal_t;
+int32_t lsm6dso_calibration_get(lsm6dso_ctx_t *ctx, dev_cal_t *val);
+
+typedef struct {
+  struct {
+    struct {
+      enum {
+        LSM6DSO_XL_UI_OFF       = 0x00, /* in power down */
+        LSM6DSO_XL_UI_1Hz6_LP   = 0x1B, /* @1Hz6 (low power) */
+        LSM6DSO_XL_UI_1Hz6_ULP  = 0x2B, /* @1Hz6 (ultra low/Gy, OIS imu off) */
+        LSM6DSO_XL_UI_12Hz5_HP  = 0x01, /* @12Hz5 (high performance) */
+        LSM6DSO_XL_UI_12Hz5_LP  = 0x11, /* @12Hz5 (low power) */
+        LSM6DSO_XL_UI_12Hz5_ULP = 0x21, /* @12Hz5 (ultra low/Gy, OIS imu off) */
+        LSM6DSO_XL_UI_26Hz_HP   = 0x02, /* @26Hz  (high performance) */
+        LSM6DSO_XL_UI_26Hz_LP   = 0x12, /* @26Hz  (low power) */
+        LSM6DSO_XL_UI_26Hz_ULP  = 0x22, /* @26Hz  (ultra low/Gy, OIS imu off) */
+        LSM6DSO_XL_UI_52Hz_HP   = 0x03, /* @52Hz  (high performance) */
+        LSM6DSO_XL_UI_52Hz_LP   = 0x13, /* @52Hz  (low power) */
+        LSM6DSO_XL_UI_52Hz_ULP  = 0x23, /* @52Hz  (ultra low/Gy, OIS imu off) */
+        LSM6DSO_XL_UI_104Hz_HP  = 0x04, /* @104Hz (high performance) */
+        LSM6DSO_XL_UI_104Hz_NM  = 0x14, /* @104Hz (normal mode) */
+        LSM6DSO_XL_UI_104Hz_ULP = 0x24, /* @104Hz (ultra low/Gy, OIS imu off) */
+        LSM6DSO_XL_UI_208Hz_HP  = 0x05, /* @208Hz (high performance) */
+        LSM6DSO_XL_UI_208Hz_NM  = 0x15, /* @208Hz (normal mode) */
+        LSM6DSO_XL_UI_208Hz_ULP = 0x25, /* @208Hz (ultra low/Gy, OIS imu off) */
+        LSM6DSO_XL_UI_416Hz_HP  = 0x06, /* @416Hz (high performance) */
+        LSM6DSO_XL_UI_833Hz_HP  = 0x07, /* @833Hz (high performance) */
+        LSM6DSO_XL_UI_1667Hz_HP = 0x08, /* @1kHz66 (high performance) */
+        LSM6DSO_XL_UI_3333Hz_HP = 0x09, /* @3kHz33 (high performance) */
+        LSM6DSO_XL_UI_6667Hz_HP = 0x0A, /* @6kHz66 (high performance) */
+      } odr;
+      enum {
+        LSM6DSO_XL_UI_2g   = 0,
+        LSM6DSO_XL_UI_4g   = 2,
+        LSM6DSO_XL_UI_8g   = 3,
+        LSM6DSO_XL_UI_16g  = 1, /* OIS full scale is also forced to be 16g */
+      } fs;
+    } xl;
+    struct {
+      enum {
+        LSM6DSO_GY_UI_OFF       = 0x00, /* gy in power down */
+        LSM6DSO_GY_UI_12Hz5_LP  = 0x11, /* gy @12Hz5 (low power) */
+        LSM6DSO_GY_UI_12Hz5_HP  = 0x01, /* gy @12Hz5 (high performance) */
+        LSM6DSO_GY_UI_26Hz_LP   = 0x12, /* gy @26Hz  (low power) */
+        LSM6DSO_GY_UI_26Hz_HP   = 0x02, /* gy @26Hz  (high performance) */
+        LSM6DSO_GY_UI_52Hz_LP   = 0x13, /* gy @52Hz  (low power) */
+        LSM6DSO_GY_UI_52Hz_HP   = 0x03, /* gy @52Hz  (high performance) */
+        LSM6DSO_GY_UI_104Hz_NM  = 0x14, /* gy @104Hz (low power) */
+        LSM6DSO_GY_UI_104Hz_HP  = 0x04, /* gy @104Hz (high performance) */
+        LSM6DSO_GY_UI_208Hz_NM  = 0x15, /* gy @208Hz (low power) */
+        LSM6DSO_GY_UI_208Hz_HP  = 0x05, /* gy @208Hz (high performance) */
+        LSM6DSO_GY_UI_416Hz_HP  = 0x06, /* gy @416Hz (high performance) */
+        LSM6DSO_GY_UI_833Hz_HP  = 0x07, /* gy @833Hz (high performance) */
+        LSM6DSO_GY_UI_1667Hz_HP = 0x08, /* gy @1kHz66 (high performance) */
+        LSM6DSO_GY_UI_3333Hz_HP = 0x09, /* gy @3kHz33 (high performance) */
+        LSM6DSO_GY_UI_6667Hz_HP = 0x0A, /* gy @6kHz66 (high performance) */
+      } odr;
+      enum {
+        LSM6DSO_GY_UI_250dps   = 0,
+        LSM6DSO_GY_UI_125dps   = 1,
+        LSM6DSO_GY_UI_500dps   = 2,
+        LSM6DSO_GY_UI_1000dps  = 4,
+        LSM6DSO_GY_UI_2000dps  = 6,
+      } fs;
+    }gy;
+  } ui;
+  struct {
+    enum {
+      LSM6DSO_OIS_ONLY_AUX    = 0x00, /* Auxiliary SPI full control */
+      LSM6DSO_OIS_MIXED       = 0x01, /* Enabling by UI / read-config by AUX */
+    } ctrl_md;
+    struct {
+      enum {
+        LSM6DSO_XL_OIS_OFF       = 0x00, /* in power down */
+        LSM6DSO_XL_OIS_6667Hz_HP = 0x01, /* @6kHz OIS imu active/NO ULP on UI */
+      } odr;
+      enum {
+        LSM6DSO_XL_OIS_2g   = 0,
+        LSM6DSO_XL_OIS_4g   = 2,
+        LSM6DSO_XL_OIS_8g   = 3,
+        LSM6DSO_XL_OIS_16g  = 1, /* UI full scale is also forced to be 16g */
+      } fs;
+    } xl;
+    struct {
+      enum {
+        LSM6DSO_GY_OIS_OFF       = 0x00, /* in power down */
+        LSM6DSO_GY_OIS_6667Hz_HP = 0x01, /* @6kHz No Ultra Low Power*/
+      } odr;
+      enum {
+        LSM6DSO_GY_OIS_250dps   = 0,
+        LSM6DSO_GY_OIS_125dps   = 1,
+        LSM6DSO_GY_OIS_500dps   = 2,
+        LSM6DSO_GY_OIS_1000dps  = 4,
+        LSM6DSO_GY_OIS_2000dps  = 6,
+      } fs;
+    } gy;
+  } ois;
+  struct {
+    enum {
+      LSM6DSO_FSM_DISABLE = 0x00,
+      LSM6DSO_FSM_XL      = 0x01,
+      LSM6DSO_FSM_GY      = 0x02,
+      LSM6DSO_FSM_XL_GY   = 0x03,
+    } sens;
+    enum {
+      LSM6DSO_FSM_12Hz5 = 0x00,
+      LSM6DSO_FSM_26Hz  = 0x01,
+      LSM6DSO_FSM_52Hz  = 0x02,
+      LSM6DSO_FSM_104Hz = 0x03,
+    } odr;
+  } fsm;
+} lsm6dso_md_t;
+int32_t lsm6dso_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                          lsm6dso_md_t *val);
+int32_t lsm6dso_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                          lsm6dso_md_t *val);
+typedef struct {
+  struct {
+    struct {
+      float mg[3];
+      int16_t raw[3];
+    }xl;
+    struct {
+      float mdps[3];
+      int16_t raw[3];
+    }gy;
+    struct {
+      float deg_c;
+      int16_t raw;
+    }heat;
+  } ui;
+  struct {
+    struct {
+      float mg[3];
+      int16_t raw[3];
+    }xl;
+    struct {
+      float mdps[3];
+      int16_t raw[3];
+    }gy;
+  } ois;
+} lsm6dso_data_t;
+int32_t lsm6dso_data_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
+                          lsm6dso_md_t *md, lsm6dso_data_t *data);
+
+typedef struct {
+  uint8_t sig_mot      : 1; /* significant motion */
+  uint8_t tilt         : 1; /* tilt detection  */
+  uint8_t step         : 1; /* step counter/detector */
+  uint8_t step_adv     : 1; /* step counter advanced mode */
+  uint8_t fsm          : 1; /* finite state machine */
+  uint8_t fifo_compr   : 1; /* FIFO compression */
+} lsm6dso_emb_sens_t;
+int32_t lsm6dso_embedded_sens_set(lsm6dso_ctx_t *ctx,
+                                   lsm6dso_emb_sens_t *emb_sens);
+int32_t lsm6dso_embedded_sens_get(lsm6dso_ctx_t *ctx,
+                                   lsm6dso_emb_sens_t *emb_sens);
+int32_t lsm6dso_embedded_sens_off(lsm6dso_ctx_t *ctx);
 
 /**
   * @}

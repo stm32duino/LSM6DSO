@@ -77,6 +77,19 @@ typedef enum
   LSM6DSO_INT2_PIN,
 } LSM6DSO_SensorIntPin_t;
 
+typedef enum
+{
+  LSM6DSO_ACC_HIGH_PERFORMANCE_MODE,
+  LSM6DSO_ACC_LOW_POWER_NORMAL_MODE,
+  LSM6DSO_ACC_ULTRA_LOW_POWER_MODE
+} LSM6DSO_ACC_Operating_Mode_t;
+
+typedef enum
+{
+  LSM6DSO_GYRO_HIGH_PERFORMANCE_MODE,
+  LSM6DSO_GYRO_LOW_POWER_NORMAL_MODE
+} LSM6DSO_GYRO_Operating_Mode_t;
+
 typedef struct
 {
   unsigned int FreeFallStatus : 1;
@@ -107,6 +120,7 @@ class LSM6DSOSensor
     LSM6DSOStatusTypeDef Get_X_Sensitivity(float *Sensitivity);
     LSM6DSOStatusTypeDef Get_X_ODR(float *Odr);
     LSM6DSOStatusTypeDef Set_X_ODR(float Odr);
+    LSM6DSOStatusTypeDef Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mode_t Mode);
     LSM6DSOStatusTypeDef Get_X_FS(int32_t *FullScale);
     LSM6DSOStatusTypeDef Set_X_FS(int32_t FullScale);
     LSM6DSOStatusTypeDef Get_X_AxesRaw(int16_t *Value);
@@ -117,6 +131,7 @@ class LSM6DSOSensor
     LSM6DSOStatusTypeDef Get_G_Sensitivity(float *Sensitivity);
     LSM6DSOStatusTypeDef Get_G_ODR(float *Odr);
     LSM6DSOStatusTypeDef Set_G_ODR(float Odr);
+    LSM6DSOStatusTypeDef Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_Mode_t Mode);
     LSM6DSOStatusTypeDef Get_G_FS(int32_t *FullScale);
     LSM6DSOStatusTypeDef Set_G_FS(int32_t FullScale);
     LSM6DSOStatusTypeDef Get_G_AxesRaw(int16_t *Value);
