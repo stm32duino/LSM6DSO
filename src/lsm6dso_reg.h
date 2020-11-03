@@ -2880,8 +2880,8 @@ int32_t lsm6dso_all_sources_get(lsm6dso_ctx_t *ctx,
 
 typedef struct{
   uint8_t odr_fine_tune;
-} dev_cal_t;
-int32_t lsm6dso_calibration_get(lsm6dso_ctx_t *ctx, dev_cal_t *val);
+} lsm6dso_dev_cal_t;
+int32_t lsm6dso_calibration_get(lsm6dso_ctx_t *ctx, lsm6dso_dev_cal_t *val);
 
 typedef struct {
   struct {
