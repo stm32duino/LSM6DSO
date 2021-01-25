@@ -54,67 +54,8 @@ LSM6DSOSensor::LSM6DSOSensor(TwoWire *i2c, uint8_t address) : dev_i2c(i2c), addr
   reg_ctx.write_reg = LSM6DSO_io_write;
   reg_ctx.read_reg = LSM6DSO_io_read;
   reg_ctx.handle = (void *)this;
-
-  /* Disable I3C */
-  if (lsm6dso_i3c_disable_set(&reg_ctx, LSM6DSO_I3C_DISABLE) != LSM6DSO_OK)
-  {
-    return;
-  }
-
-  /* Enable register address automatically incremented during a multiple byte
-  access with a serial interface. */
-  if (lsm6dso_auto_increment_set(&reg_ctx, PROPERTY_ENABLE) != LSM6DSO_OK)
-  {
-    return;
-  }
-
-  /* Enable BDU */
-  if (lsm6dso_block_data_update_set(&reg_ctx, PROPERTY_ENABLE) != LSM6DSO_OK)
-  {
-    return;
-  }
-
-  /* FIFO mode selection */
-  if (lsm6dso_fifo_mode_set(&reg_ctx, LSM6DSO_BYPASS_MODE) != LSM6DSO_OK)
-  {
-    return;
-  }
-
-  /* Select default output data rate. */
-  acc_odr = LSM6DSO_XL_ODR_104Hz;
-
-  /* Output data rate selection - power down. */
-  if (lsm6dso_xl_data_rate_set(&reg_ctx, LSM6DSO_XL_ODR_OFF) != LSM6DSO_OK)
-  {
-    return;
-  }
-
-  /* Full scale selection. */
-  if (lsm6dso_xl_full_scale_set(&reg_ctx, LSM6DSO_2g) != LSM6DSO_OK)
-  {
-    return;
-  }
-
-  /* Select default output data rate. */
-  gyro_odr = LSM6DSO_GY_ODR_104Hz;
-
-  /* Output data rate selection - power down. */
-  if (lsm6dso_gy_data_rate_set(&reg_ctx, LSM6DSO_GY_ODR_OFF) != LSM6DSO_OK)
-  {
-    return;
-  }
-
-  /* Full scale selection. */
-  if (lsm6dso_gy_full_scale_set(&reg_ctx, LSM6DSO_2000dps) != LSM6DSO_OK)
-  {
-    return;
-  }
-
   acc_is_enabled = 0;
   gyro_is_enabled = 0;
-
-  
-  return;
 }
 
 /** Constructor
@@ -126,37 +67,49 @@ LSM6DSOSensor::LSM6DSOSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : de
 {
   reg_ctx.write_reg = LSM6DSO_io_write;
   reg_ctx.read_reg = LSM6DSO_io_read;
-  reg_ctx.handle = (void *)this;
-
-  // Configure CS pin
-  pinMode(cs_pin, OUTPUT);
-  digitalWrite(cs_pin, HIGH); 
+  reg_ctx.handle = (void *)this; 
   dev_i2c = NULL;
   address = 0;
+  acc_is_enabled = 0U;
+  gyro_is_enabled = 0U;
+}
+
+/**
+ * @brief  Configure the sensor in order to be used
+ * @retval 0 in case of success, an error code otherwise
+ */
+LSM6DSOStatusTypeDef LSM6DSOSensor::begin()
+{
+  if(dev_spi)
+  {
+    // Configure CS pin
+    pinMode(cs_pin, OUTPUT);
+    digitalWrite(cs_pin, HIGH); 
+  }
 
   /* Disable I3C */
   if (lsm6dso_i3c_disable_set(&reg_ctx, LSM6DSO_I3C_DISABLE) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
 
   /* Enable register address automatically incremented during a multiple byte
   access with a serial interface. */
   if (lsm6dso_auto_increment_set(&reg_ctx, PROPERTY_ENABLE) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
 
   /* Enable BDU */
   if (lsm6dso_block_data_update_set(&reg_ctx, PROPERTY_ENABLE) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
 
   /* FIFO mode selection */
   if (lsm6dso_fifo_mode_set(&reg_ctx, LSM6DSO_BYPASS_MODE) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
 
   /* Select default output data rate. */
@@ -165,13 +118,13 @@ LSM6DSOSensor::LSM6DSOSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : de
   /* Output data rate selection - power down. */
   if (lsm6dso_xl_data_rate_set(&reg_ctx, LSM6DSO_XL_ODR_OFF) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
 
   /* Full scale selection. */
   if (lsm6dso_xl_full_scale_set(&reg_ctx, LSM6DSO_2g) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
 
   /* Select default output data rate. */
@@ -180,23 +133,47 @@ LSM6DSOSensor::LSM6DSOSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : de
   /* Output data rate selection - power down. */
   if (lsm6dso_gy_data_rate_set(&reg_ctx, LSM6DSO_GY_ODR_OFF) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
 
   /* Full scale selection. */
   if (lsm6dso_gy_full_scale_set(&reg_ctx, LSM6DSO_2000dps) != LSM6DSO_OK)
   {
-    return;
+    return LSM6DSO_ERROR;
   }
-  
+
   acc_is_enabled = 0;
   gyro_is_enabled = 0;
 
-  
-  return;  
-  
+  return LSM6DSO_OK;
 }
 
+/**
+ * @brief  Disable the sensor and relative resources
+ * @retval 0 in case of success, an error code otherwise
+ */
+LSM6DSOStatusTypeDef LSM6DSOSensor::end()
+{
+  /* Disable both acc and gyro */
+  if (Disable_X() != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  if (Disable_G() != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  /* Reset CS configuration */
+  if(dev_spi)
+  {
+    // Configure CS pin
+    pinMode(cs_pin, INPUT); 
+  }
+
+  return LSM6DSO_OK;
+}
 
 /**
  * @brief  Read component ID
