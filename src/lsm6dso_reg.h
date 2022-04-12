@@ -1565,17 +1565,17 @@ int32_t lsm6dso_read_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lsm6dso_write_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float_t lsm6dso_from_fs2_to_mg(int16_t lsb);
-extern float_t lsm6dso_from_fs4_to_mg(int16_t lsb);
-extern float_t lsm6dso_from_fs8_to_mg(int16_t lsb);
-extern float_t lsm6dso_from_fs16_to_mg(int16_t lsb);
-extern float_t lsm6dso_from_fs125_to_mdps(int16_t lsb);
-extern float_t lsm6dso_from_fs500_to_mdps(int16_t lsb);
-extern float_t lsm6dso_from_fs250_to_mdps(int16_t lsb);
-extern float_t lsm6dso_from_fs1000_to_mdps(int16_t lsb);
-extern float_t lsm6dso_from_fs2000_to_mdps(int16_t lsb);
-extern float_t lsm6dso_from_lsb_to_celsius(int16_t lsb);
-extern float_t lsm6dso_from_lsb_to_nsec(int16_t lsb);
+extern float lsm6dso_from_fs2_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs4_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs8_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs16_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs125_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs500_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs250_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs1000_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs2000_to_mdps(int16_t lsb);
+extern float lsm6dso_from_lsb_to_celsius(int16_t lsb);
+extern float lsm6dso_from_lsb_to_nsec(int16_t lsb);
 
 typedef enum {
   LSM6DSO_2g   = 0,
