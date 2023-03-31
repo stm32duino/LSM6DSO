@@ -9741,6 +9741,10 @@ int32_t lsm6dso_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
   int32_t ret;
 
   ret = 0;
+  ctrl2_ois.hp_en_ois = 0;
+  ctrl2_ois.ftype_ois = 0;
+  ctrl2_ois.not_used_01 = 0;
+  ctrl2_ois.hpm_ois = 0;
 
   /* reading input configuration */
   xl_hm_mode = ( (uint8_t)val->ui.xl.odr & 0x10U ) >> 4;
