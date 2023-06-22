@@ -38,6 +38,8 @@ Get_G_Axes	KEYWORD2
 Read_Reg	KEYWORD2
 Write_Reg	KEYWORD2
 Set_Interrupt_Latch	KEYWORD2
+Set_Interrupt_Polarity	KEYWORD2
+Set_Interrupt_PinMode	KEYWORD2
 Enable_Free_Fall_Detection	KEYWORD2
 Disable_Free_Fall_Detection	KEYWORD2
 Set_Free_Fall_Threshold	KEYWORD2
