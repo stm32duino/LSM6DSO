@@ -142,6 +142,8 @@ class LSM6DSOSensor
     LSM6DSOStatusTypeDef Read_Reg(uint8_t reg, uint8_t *Data);
     LSM6DSOStatusTypeDef Write_Reg(uint8_t reg, uint8_t Data);
     LSM6DSOStatusTypeDef Set_Interrupt_Latch(uint8_t Status);
+    LSM6DSOStatusTypeDef Set_Interrupt_Polarity(uint8_t Status);
+    LSM6DSOStatusTypeDef Set_Interrupt_PinMode(uint8_t Status);
     
     LSM6DSOStatusTypeDef Enable_Free_Fall_Detection(LSM6DSO_SensorIntPin_t IntPin);
     LSM6DSOStatusTypeDef Disable_Free_Fall_Detection();

@@ -1221,6 +1221,46 @@ LSM6DSOStatusTypeDef LSM6DSOSensor::Set_Interrupt_Latch(uint8_t Status)
 }
 
 /**
+ * @brief  Set the interrupt latch
+ * @param  Status value to be written
+ * @retval 0 in case of success, an error code otherwise
+ */
+LSM6DSOStatusTypeDef LSM6DSOSensor::Set_Interrupt_Polarity(uint8_t Status)
+{
+  if (Status > 1U)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  if (lsm6dso_pin_polarity_set(&reg_ctx, (lsm6dso_h_lactive_t)Status) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  return LSM6DSO_OK;
+}
+
+/**
+ * @brief  Set the interrupt latch
+ * @param  Status value to be written
+ * @retval 0 in case of success, an error code otherwise
+ */
+LSM6DSOStatusTypeDef LSM6DSOSensor::Set_Interrupt_PinMode(uint8_t Status)
+{
+  if (Status > 1U)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  if (lsm6dso_pin_mode_set(&reg_ctx, (lsm6dso_pp_od_t)Status) != LSM6DSO_OK)
+  {
+    return LSM6DSO_ERROR;
+  }
+
+  return LSM6DSO_OK;
+}
+
+/**
  * @brief  Enable free fall detection
  * @param  IntPin interrupt pin line to be used
  * @retval 0 in case of success, an error code otherwise
