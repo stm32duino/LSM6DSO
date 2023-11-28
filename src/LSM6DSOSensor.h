@@ -50,6 +50,12 @@
 #include "lsm6dso_reg.h"
 
 /* Defines -------------------------------------------------------------------*/
+/* For compatibility with ESP32 platforms */
+#ifdef ESP32
+#ifndef MSBFIRST
+#define MSBFIRST SPI_MSBFIRST
+#endif
+#endif
 
 #define LSM6DSO_ACC_SENSITIVITY_FS_2G   0.061f
 #define LSM6DSO_ACC_SENSITIVITY_FS_4G   0.122f
