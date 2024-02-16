@@ -37,6 +37,26 @@ The access to the sensor values is done as explained below:
     AccGyr.Get_X_Axes(accelerometer);  
     AccGyr.Get_G_Axes(gyroscope);
 
+# Examples
+
+There are several examples with the LSM6DSO library.
+* LSM6DSO_HelloWorld: This application provides a simple example of usage of the LSM6DSO 
+IMU 6-axis. It shows how to display on a hyperterminal the values of the sensor.
+* LSM6DSO_6DOrientation: This application shows how to use the LSM6DSO accelerometer 
+to find out the 6D orientation and display data on a hyperterminal.
+* LSM6DSO_FreeFallDetection: This application shows how to detect the free fall event using the 
+LSM6DSO accelerometer.
+* LSM6DSO_Pedometer: This application shows how to use the LSM6DSO accelerometer 
+to count steps.
+* LSM6DSO_SingleTap: This application shows how to detect the single tap event using the 
+LSM6DSO accelerometer.
+* LSM6DSO_DoubleTap: This application shows how to detect the double tap event using the 
+LSM6DSO accelerometer.
+* LSM6DSO_TiltDetection: This application shows how to detect the tilt event using the 
+LSM6DSO accelerometer.
+* LSM6DSO_WakeUpDetection: This application shows how to detect the wake-up event using the 
+LSM6DSO accelerometer.
+
 ## Documentation
 
 You can find the source files at  
