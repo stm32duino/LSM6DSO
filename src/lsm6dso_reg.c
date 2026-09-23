@@ -1277,7 +1277,7 @@ int32_t lsm6dso_steps_reset(lsm6dso_ctx_t *ctx)
 
 /**
   * @defgroup  LSM6DSO_common
-  * @brief   This section groups common usefull functions.
+  * @brief   This section groups common useful functions.
   * @{
   *
 */
@@ -3578,7 +3578,7 @@ int32_t lsm6dso_i3c_disable_get(lsm6dso_ctx_t *ctx, lsm6dso_i3c_disable_t *val)
 
 /**
   * @defgroup  LSM6DSO_interrupt_pins
-  * @brief     This section groups all the functions that manage interrup pins
+  * @brief     This section groups all the functions that manage interrupt pins
   * @{
   *
   */
@@ -8519,10 +8519,10 @@ int32_t lsm6dso_sh_status_get(lsm6dso_ctx_t *ctx,
 /**
   * @brief  Device "Who am I".[get]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          ID values read from the two interfaces. ID values
   *                      will be the same.(ptr)
   *
@@ -8551,7 +8551,7 @@ int32_t lsm6dso_id_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
   * @param  ctx          communication interface handler.(ptr)
   * @param  val          re-initialization mode. Refer to datasheet
   *                      and application note for more information
-  *                      about differencies beetween boot and sw_reset
+  *                      about differences between boot and sw_reset
   *                      procedure.
   *
   */
@@ -8615,10 +8615,10 @@ int32_t lsm6dso_init_set(lsm6dso_ctx_t *ctx, lsm6dso_init_t val)
 /**
   * @brief  Configures the bus operating mode.[set]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          configures the bus operating mode for both the
   *                      main and the auxiliary interface.
   *
@@ -8701,10 +8701,10 @@ int32_t lsm6dso_bus_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
 /**
   * @brief  Get the bus operating mode.[get]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          retrieves the bus operating mode for both the main
   *                      and the auxiliary interface.(ptr)
   *
@@ -8792,10 +8792,10 @@ int32_t lsm6dso_bus_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
 /**
   * @brief  Get the status of the device.[get]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          the status of the device.(ptr)
   *
   */
@@ -9276,10 +9276,10 @@ int32_t lsm6dso_pin_int1_route_get(lsm6dso_ctx_t *ctx,
 /**
   * @brief  Route interrupt signals on int2 pin.[set]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          the signals to route on int2 pin.
   *
   */
@@ -9462,10 +9462,10 @@ int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
 /**
   * @brief  Route interrupt signals on int2 pin.[get]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          the signals that are routed on int2 pin.(ptr)
   *
   */
@@ -9705,10 +9705,10 @@ int32_t lsm6dso_all_sources_get(lsm6dso_ctx_t *ctx,
 /**
   * @brief  Sensor conversion parameters selection.[set]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          set the sensor conversion parameters by checking
   *                      the constraints of the device.(ptr)
   *
@@ -10065,10 +10065,10 @@ int32_t lsm6dso_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_ctx_t *aux_ctx,
 /**
   * @brief  Sensor conversion parameters selection.[get]
   *
-  * @param  ctx          communication interface handler. Use NULL to ingnore
+  * @param  ctx          communication interface handler. Use NULL to ignore
   *                      this interface.(ptr)
   * @param  aux_ctx      auxiliary communication interface handler. Use NULL
-  *                      to ingnore this interface.(ptr)
+  *                      to ignore this interface.(ptr)
   * @param  val          get the sensor conversion parameters.(ptr)
   *
   */
